@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sơ đồ Cơ sở Dữ liệu - Quản lý Chương trình Đào tạo</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* DESIGN SYSTEM & UTILITIES */
+    :root {
+      --bg-color: #f3f4f6;
+      --grid-color: rgba(0, 0, 0, 0.04);
+      --sidebar-bg: #ffffff;
+      --sidebar-border: #e5e7eb;
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --card-border: #e5e7eb;
+      --text-color: #1f2937;
+      --text-muted: #6b7280;
+      --accent-color: #3b82f6;
+      --accent-hover: #2563eb;
+      --line-color: #9ca3af;
+      --line-highlight: #3b82f6;
+      --shadow: rgba(0, 0, 0, 0.08);
+      --input-bg: #f9fafb;
+      --input-border: #d1d5db;
+      --btn-bg: #f3f4f6;
+      --btn-border: #d1d5db;
+      --btn-active: #e5e7eb;
+      --scroll-thumb: #d1d5db;
+    }
+    
+    html.dark {
+      --bg-color: #0b0f19;
+      --grid-color: rgba(255, 255, 255, 0.03);
+      --sidebar-bg: #111827;
+      --sidebar-border: #1f2937;
+      --card-bg: rgba(31, 41, 55, 0.9);
+      --card-border: #374151;
+      --text-color: #f9fafb;
+      --text-muted: #9ca3af;
+      --accent-color: #60a5fa;
+      --accent-hover: #93c5fd;
+      --line-color: #4b5563;
+      --line-highlight: #60a5fa;
+      --shadow: rgba(0, 0, 0, 0.4);
+      --input-bg: #1f2937;
+      --input-border: #374151;
+      --btn-bg: #1f2937;
+      --btn-border: #374151;
+      --btn-active: #2d3748;
+      --scroll-thumb: #374151;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    
+    /* LAYOUT STRUCTURE */
+    #sidebar {
+      width: 320px;
+      background-color: var(--sidebar-bg);
+      border-right: 1px solid var(--sidebar-border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      z-index: 10;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+    
+    #stage-container {
+      flex-grow: 1;
+      position: relative;
+      overflow: hidden;
+      background-color: var(--bg-color);
+      background-image: 
+        linear-gradient(var(--grid-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+      background-size: 20px 20px;
+      cursor: grab;
+      user-select: none;
+    }
+    
+    #stage-container:active {
+      cursor: grabbing;
+    }
+    
+    /* SIDEBAR CONTROLS */
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--sidebar-border);
+    }
+    
+    .sidebar-header h1 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 4px;
+    }
+    
+    .sidebar-header p {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    
+    .sidebar-search {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--sidebar-border);
+    }
+    
+    .search-wrapper {
+      position: relative;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 10px 12px 10px 36px;
+      font-size: 13px;
+      border-radius: 6px;
+      border: 1px solid var(--input-border);
+      background-color: var(--input-bg);
+      color: var(--text-color);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    
+    .search-input:focus {
+      border-color: var(--accent-color);
+    }
+    
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      height: 14px;
+      fill: var(--text-muted);
+      pointer-events: none;
+    }
+    
+    /* GROUP FILTERS */
+    .sidebar-filters {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--sidebar-border);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .filter-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+    }
+    
+    .filter-btn {
+      padding: 6px 8px;
+      font-size: 11px;
+      font-weight: 500;
+      border: 1px solid var(--btn-border);
+      background-color: var(--btn-bg);
+      color: var(--text-color);
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    
+    .filter-btn:hover {
+      background-color: var(--btn-active);
+    }
+    
+    .filter-btn.active {
+      background-color: var(--btn-active);
+      border-color: var(--accent-color);
+    }
+    
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    
+    /* Group Color Codes */
+    .dot-general { background: #10b981; }
+    .dot-majors { background: #3b82f6; }
+    .dot-subjects { background: #8b5cf6; }
+    .dot-curriculum { background: #f97316; }
+    .dot-classes { background: #eab308; }
+    .dot-schedule { background: #06b6d4; }
+    
+    /* TABLE LIST */
+    .sidebar-list-container {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 10px 0;
+    }
+    
+    .sidebar-list-item {
+      padding: 8px 20px;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.15s;
+    }
+    
+    .sidebar-list-item:hover {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+    
+    html.dark .sidebar-list-item:hover {
+      background-color: rgba(255, 255, 255, 0.04);
+    }
+    
+    .table-badge {
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .badge-general { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+    .badge-majors { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+    .badge-subjects { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
+    .badge-curriculum { background: rgba(249, 115, 22, 0.15); color: #f97316; }
+    .badge-classes { background: rgba(234, 179, 8, 0.15); color: #eab308; }
+    .badge-schedule { background: rgba(6, 182, 212, 0.15); color: #06b6d4; }
+    
+    /* VIEWPORT OPTIONS */
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--sidebar-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: var(--sidebar-bg);
+    }
+    
+    .footer-actions {
+      display: flex;
+      gap: 6px;
+    }
+    
+    .action-btn {
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 500;
+      border: 1px solid var(--btn-border);
+      background-color: var(--btn-bg);
+      color: var(--text-color);
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .action-btn:hover {
+      background-color: var(--btn-active);
+    }
+    
+    .theme-toggle-btn {
+      border: none;
+      background: none;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-color);
+    }
+    
+    .theme-toggle-btn:hover {
+      background-color: var(--btn-active);
+    }
+    
+    /* DB DIAGRAM CANVAS */
+    #svg-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    
+    .relation-line {
+      stroke: var(--line-color);
+      stroke-width: 1.5;
+      fill: none;
+      opacity: 0.35;
+      transition: stroke 0.25s, stroke-width 0.25s, opacity 0.25s;
+    }
+    
+    .relation-line.highlighted {
+      stroke: var(--line-highlight);
+      stroke-width: 3.5;
+      opacity: 1;
+    }
+    
+    .relation-line.faded {
+      opacity: 0.03;
+    }
+    
+    /* TABLE CARDS */
+    .table-card {
+      transition: opacity 0.25s ease;
+      cursor: grab;
+    }
+    
+    .table-card:active {
+      cursor: grabbing;
+    }
+    
+    .table-card.faded {
+      opacity: 0.15;
+    }
+    
+    .table-card.highlighted {
+      opacity: 1;
+      filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.15));
+    }
+    
+    .card-container {
+      background: var(--card-bg);
+      border: 1.5px solid var(--card-border);
+      border-radius: 8px;
+      box-shadow: 0 4px 10px var(--shadow);
+      color: var(--text-color);
+      font-family: inherit;
+      font-size: 11px;
+      overflow: hidden;
+      height: 100%;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.25s, background-color 0.25s;
+    }
+    
+    .table-card.highlighted .card-container {
+      border-color: var(--accent-color);
+    }
+    
+    .card-header {
+      padding: 8px 12px;
+      font-weight: 600;
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1.5px solid var(--card-border);
+      color: #ffffff;
+      user-select: none;
+    }
+    
+    /* Header gradients based on groups */
+    .group-general .card-header { background: linear-gradient(135deg, #059669, #10b981); }
+    .group-majors .card-header { background: linear-gradient(135deg, #2563eb, #3b82f6); }
+    .group-subjects .card-header { background: linear-gradient(135deg, #7c3aed, #8b5cf6); }
+    .group-curriculum .card-header { background: linear-gradient(135deg, #ea580c, #f97316); }
+    .group-classes .card-header { background: linear-gradient(135deg, #ca8a04, #eab308); }
+    .group-schedule .card-header { background: linear-gradient(135deg, #0891b2, #06b6d4); }
+    
+    .card-title-sub {
+      font-size: 9px;
+      opacity: 0.85;
+      font-weight: 400;
+      margin-top: 2px;
+    }
+    
+    .card-cols {
+      padding: 4px 0;
+      flex-grow: 1;
+      background-color: var(--card-bg);
+    }
+    
+    .col-row {
+      display: flex;
+      align-items: center;
+      padding: 4px 12px;
+      gap: 6px;
+      height: 24px;
+    }
+    
+    .col-row:hover {
+      background: rgba(0, 0, 0, 0.03);
+    }
+    
+    html.dark .col-row:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+    
+    .col-key-icon {
+      font-weight: 700;
+      font-size: 8px;
+      width: 14px;
+      height: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    
+    .key-pk .col-key-icon {
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.15);
+    }
+    
+    .key-fk .col-key-icon {
+      color: #3b82f6;
+      background: rgba(59, 130, 246, 0.15);
+    }
+    
+    .col-name {
+      flex-grow: 1;
+      font-family: 'Courier New', Courier, monospace;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text-color);
+    }
+    
+    .col-type {
+      color: var(--text-muted);
+      font-size: 9px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    
+    /* SCROLLBAR CUSTOMIZATION */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: var(--scroll-thumb);
+      border-radius: 3px;
+    }
+    
+    /* FLOAT BANNER */
+    .top-banner {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 10px 14px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      z-index: 5;
+      font-size: 12px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+    
+    .top-banner span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR PANEL -->
+  <div id="sidebar">
+    <div class="sidebar-header">
+      <h1>Cơ sở Dữ liệu</h1>
+      <p>QL Chương trình Đào tạo</p>
+    </div>
+    
+    <!-- Search Bar -->
+    <div class="sidebar-search">
+      <div class="search-wrapper">
+        <svg class="search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <input type="text" class="search-input" id="search-input" placeholder="Tìm bảng hoặc cột..." oninput="searchTables(this.value)">
+      </div>
+    </div>
+    
+    <!-- Logical Group Filters -->
+    <div class="sidebar-filters">
+      <div class="filter-title">Bộ lọc nhóm dữ liệu</div>
+      <div class="filter-grid">
+        <button class="filter-btn active" data-group="general" onclick="toggleGroup('general')">
+          <span class="dot dot-general"></span>Chung (Master)
+        </button>
+        <button class="filter-btn active" data-group="majors" onclick="toggleGroup('majors')">
+          <span class="dot dot-majors"></span>Ngành / Khóa
+        </button>
+        <button class="filter-btn active" data-group="subjects" onclick="toggleGroup('subjects')">
+          <span class="dot dot-subjects"></span>Môn học / ĐK
+        </button>
+        <button class="filter-btn active" data-group="curriculum" onclick="toggleGroup('curriculum')">
+          <span class="dot dot-curriculum"></span>Khung CTK
+        </button>
+        <button class="filter-btn active" data-group="classes" onclick="toggleGroup('classes')">
+          <span class="dot dot-classes"></span>Lớp & Phân môn
+        </button>
+        <button class="filter-btn active" data-group="schedule" onclick="toggleGroup('schedule')">
+          <span class="dot dot-schedule"></span>Lịch / Giảng dạy
+        </button>
+      </div>
+    </div>
+    
+    <!-- Table List -->
+    <div class="sidebar-list-container" id="sidebar-list">
+      <!-- Generated dynamically -->
+    </div>
+    
+    <!-- View Options / Footer -->
+    <div class="sidebar-footer">
+      <div class="footer-actions">
+        <button class="action-btn" onclick="resetZoom()">Reset</button>
+        <button class="action-btn" onclick="fitToScreen()">Fit All</button>
+      </div>
+      <button class="theme-toggle-btn" id="theme-toggle" onclick="toggleTheme()" title="Chuyển chế độ Sáng/Tối">
+        <!-- Moon Icon -->
+        <svg class="dark-icon" style="display:none;" width="18" height="18" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/></svg>
+        <!-- Sun Icon -->
+        <svg class="light-icon" width="18" height="18" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- DIAGRAM CONTAINER STAGE -->
+  <div id="stage-container">
+    <!-- Top Floating Help Banner -->
+    <div class="top-banner">
+      <span><span class="dot" style="background:#ef4444; width:10px; height:10px;"></span>Khóa Chính (PK)</span>
+      <span><span class="dot" style="background:#3b82f6; width:10px; height:10px;"></span>Khóa Phụ (FK / Logic)</span>
+      <span>🖱️ Lăn chuột: Phóng to/Thu nhỏ | Giữ và kéo: Di chuyển sơ đồ hoặc các bảng</span>
+    </div>
+    
+    <svg id="svg-canvas">
+      <defs>
+        <!-- Custom styled relation arrows -->
+        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--line-color)" />
+        </marker>
+        <marker id="arrow-active" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--line-highlight)" />
+        </marker>
+      </defs>
+      <g id="viewport" transform="translate(100, 50) scale(0.65)">
+        <g id="lines-group"></g>
+        <g id="nodes-group"></g>
+      </g>
+    </svg>
+  </div>
+
+  <script>
+    // METADATA DEFINITIONS FOR TRAINING PROGRAM MODULE (32 Tables)
+    const tables = [
+      // Group 1: General Masters
+      {
+        id: "DM_HeDaoTao",
+        name: "DM_HeDaoTao",
+        title: "Bậc đào tạo / Hệ đào tạo",
+        group: "general",
+        x: 60, y: 100,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "MaHeDaoTao", type: "varchar(10)", key: "" },
+          { name: "TenHeDaoTao", type: "nvarchar(100)", key: "" },
+          { name: "BacTrinhDo", type: "int", key: "" },
+          { name: "KyTuMaSinhVien", type: "varchar(4)", key: "" }
+        ],
+        relations: []
+      },
+      {
+        id: "DM_LoaiHinhDT",
+        name: "DM_LoaiHinhDT",
+        title: "Loại hình đào tạo",
+        group: "general",
+        x: 60, y: 310,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "MaLoaiHinhDT", type: "varchar(10)", key: "" },
+          { name: "TenLoaiHinhDT", type: "nvarchar(100)", key: "" },
+          { name: "HinhThuc", type: "nvarchar(100)", key: "" }
+        ],
+        relations: []
+      },
+      {
+        id: "DM_ThoiGianDaoTao",
+        name: "DM_ThoiGianDaoTao",
+        title: "Thời gian kế hoạch đào tạo",
+        group: "general",
+        x: 380, y: 100,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "IDHeDaoTao", type: "int", key: "FK" },
+          { name: "IDLoaiHinhDT", type: "int", key: "FK" },
+          { name: "ThoiGianKeHoach", type: "decimal(3,1)", key: "" },
+          { name: "ThoiGianToiDa", type: "decimal(3,1)", key: "" },
+          { name: "HeSoDaoTao", type: "decimal(5,2)", key: "" }
+        ],
+        relations: [
+          { toTable: "DM_HeDaoTao", fromCol: "IDHeDaoTao", toCol: "Id" },
+          { toTable: "DM_LoaiHinhDT", fromCol: "IDLoaiHinhDT", toCol: "Id" }
+        ]
+      },
+      {
+        id: "DM_KhoiNganh",
+        name: "DM_KhoiNganh",
+        title: "Khối ngành học",
+        group: "general",
+        x: 60, y: 480,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "MaKhoiNganh", type: "varchar(20)", key: "" },
+          { name: "TenKhoiNganh", type: "nvarchar(50)", key: "" },
+          { name: "TongSoTinChi", type: "decimal(18,2)", key: "" }
+        ],
+        relations: []
+      },
+      {
+        id: "DM_NamHoc",
+        name: "DM_NamHoc",
+        title: "Năm học niên khóa",
+        group: "general",
+        x: 60, y: 660,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "NamHoc", type: "int", key: "" },
+          { name: "NienHoc", type: "varchar(20)", key: "" },
+          { name: "TuNgay", type: "datetime", key: "" },
+          { name: "DenNgay", type: "datetime", key: "" }
+        ],
+        relations: []
+      },
+      {
+        id: "DM_KhoaHoc",
+        name: "DM_KhoaHoc",
+        title: "Khóa học học viên",
+        group: "general",
+        x: 60, y: 860,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "TenKhoaHoc", type: "nvarchar(20)", key: "" },
+          { name: "Nam", type: "smallint", key: "" }
+        ],
+        relations: []
+      },
+      {
+        id: "DM_Dot",
+        name: "DM_Dot",
+        title: "Đợt / Học kỳ tuyển sinh",
+        group: "general",
+        x: 380, y: 660,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "TenDot", type: "nvarchar(50)", key: "" },
+          { name: "IDNamHoc", type: "int", key: "FK" },
+          { name: "SoTuan", type: "int", key: "" }
+        ],
+        relations: [
+          { toTable: "DM_NamHoc", fromCol: "IDNamHoc", toCol: "Id" }
+        ]
+      },
+
+      // Group 2: Majors & Specializations
+      {
+        id: "DM_Nganh",
+        name: "DM_Nganh",
+        title: "Ngành đào tạo chuyên môn",
+        group: "majors",
+        x: 380, y: 310,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "MaNganh", type: "varchar(20)", key: "" },
+          { name: "TenNganh", type: "nvarchar(100)", key: "" },
+          { name: "IDHeDaoTao", type: "int", key: "FK" },
+          { name: "IDKhoiNganh", type: "int", key: "FK" }
+        ],
+        relations: [
+          { toTable: "DM_HeDaoTao", fromCol: "IDHeDaoTao", toCol: "Id" },
+          { toTable: "DM_KhoiNganh", fromCol: "IDKhoiNganh", toCol: "Id" }
+        ]
+      },
+      {
+        id: "DM_ChuyenNganhChiTiet",
+        name: "DM_ChuyenNganhChiTiet",
+        title: "Chuyên ngành chi tiết (Nghề)",
+        group: "majors",
+        x: 380, y: 500,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "MaChuyenNganh", type: "varchar(20)", key: "" },
+          { name: "TenChuyenNganh", type: "nvarchar(100)", key: "" },
+          { name: "IDNganh", type: "int", key: "FK" }
+        ],
+        relations: [
+          { toTable: "DM_Nganh", fromCol: "IDNganh", toCol: "Id" }
+        ]
+      },
+      {
+        id: "DM_QuyDinhKhoaNganh",
+        name: "DM_QuyDinhKhoaNganh",
+        title: "Quy định Khóa - Ngành học",
+        group: "majors",
+        x: 690, y: 550,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "IDKhoaHoc", type: "int", key: "FK" },
+          { name: "IDNganh", type: "int", key: "FK" },
+          { name: "IDHeDaoTao", type: "int", key: "FK" },
+          { name: "IDLoaiHinhDaoTao", type: "int", key: "FK" },
+          { name: "IDDot", type: "int", key: "FK" }
+        ],
+        relations: [
+          { toTable: "DM_KhoaHoc", fromCol: "IDKhoaHoc", toCol: "Id" },
+          { toTable: "DM_Nganh", fromCol: "IDNganh", toCol: "Id" },
+          { toTable: "DM_HeDaoTao", fromCol: "IDHeDaoTao", toCol: "Id" },
+          { toTable: "DM_LoaiHinhDT", fromCol: "IDLoaiHinhDaoTao", toCol: "Id" },
+          { toTable: "DM_Dot", fromCol: "IDDot", toCol: "Id" }
+        ]
+      },
+
+      // Group 3: Subjects & Constraints
+      {
+        id: "DM_MonHoc",
+        name: "DM_MonHoc",
+        title: "Danh sách môn học chính thức",
+        group: "subjects",
+        x: 690, y: 150,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "MaMonHoc", type: "nvarchar(50)", key: "" },
+          { name: "TenMonHoc", type: "nvarchar(200)", key: "" },
+          { name: "IDKhoiKienThuc", type: "int", key: "FK" },
+          { name: "IDTinhChatMonHoc", type: "int", key: "FK" }
+        ],
+        relations: [
+          { toTable: "DM_KhoiKienThuc", fromCol: "IDKhoiKienThuc", toCol: "Id" },
+          { toTable: "DM_TinhChatMonHoc", fromCol: "IDTinhChatMonHoc", toCol: "Id" }
+        ]
+      },
+      {
+        id: "DM_KhoiKienThuc",
+        name: "DM_KhoiKienThuc",
+        title: "Khối kiến thức khung chương trình",
+        group: "subjects",
+        x: 690, y: 10,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "MaKhoiKienThuc", type: "nvarchar(20)", key: "" },
+          { name: "TenKhoiKienThuc", type: "nvarchar(100)", key: "" }
+        ],
+        relations: []
+      },
+      {
+        id: "DM_TinhChatMonHoc",
+        name: "DM_TinhChatMonHoc",
+        title: "Tính chất môn học (Lý thuyết/Thực hành)",
+        group: "subjects",
+        x: 1000, y: 10,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "MaTinhChat", type: "varchar(10)", key: "" },
+          { name: "TenTinhChat", type: "nvarchar(100)", key: "" }
+        ],
+        relations: []
+      },
+      {
+        id: "DM_HinhThucThi",
+        name: "DM_HinhThucThi",
+        title: "Hình thức thi & Số GV chấm",
+        group: "subjects",
+        x: 380, y: 10,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "MaHinhThucThi", type: "nvarchar(20)", key: "" },
+          { name: "TenHinhThucThi", type: "nvarchar(200)", key: "" }
+        ],
+        relations: []
+      },
+      {
+        id: "DM_MonHocHeDaoTao",
+        name: "DM_MonHocHeDaoTao",
+        title: "Môn học cấu hình bậc đào tạo",
+        group: "subjects",
+        x: 1000, y: 150,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "IDMonHoc", type: "int", key: "FK" },
+          { name: "IDHeDaoTao", type: "int", key: "FK" },
+          { name: "IDHinhThucThi", type: "int", key: "FK" },
+          { name: "SoTinChi", type: "varchar(50)", key: "" }
+        ],
+        relations: [
+          { toTable: "DM_MonHoc", fromCol: "IDMonHoc", toCol: "Id" },
+          { toTable: "DM_HeDaoTao", fromCol: "IDHeDaoTao", toCol: "Id" },
+          { toTable: "DM_HinhThucThi", fromCol: "IDHinhThucThi", toCol: "Id" }
+        ]
+      },
+      {
+        id: "DM_MonHocRangBuoc",
+        name: "DM_MonHocRangBuoc",
+        title: "Môn học trước / Tiên quyết / Song hành",
+        group: "subjects",
+        x: 690, y: 360,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "IDHeDaoTao", type: "int", key: "FK" },
+          { name: "IDMonHoc", type: "int", key: "FK" },
+          { name: "IDMonHocTruoc", type: "varchar(2000)", key: "" },
+          { name: "IDMonHocTienQuyet", type: "varchar(2000)", key: "" }
+        ],
+        relations: [
+          { toTable: "DM_MonHoc", fromCol: "IDMonHoc", toCol: "Id" },
+          { toTable: "DM_HeDaoTao", fromCol: "IDHeDaoTao", toCol: "Id" }
+        ]
+      },
+      {
+        id: "DT_MonHocThayTe",
+        name: "DT_MonHocThayTe",
+        title: "Bảng cấu hình môn học thay thế",
+        group: "subjects",
+        x: 1000, y: 370,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "IDKhoaHoc", type: "int", key: "FK" },
+          { name: "IDHeDaoTao", type: "int", key: "FK" },
+          { name: "IDLoaiHinhDT", type: "int", key: "FK" },
+          { name: "IDNganh", type: "int", key: "FK" },
+          { name: "IDNghe", type: "int", key: "FK" }
+        ],
+        relations: [
+          { toTable: "DM_KhoaHoc", fromCol: "IDKhoaHoc", toCol: "Id" },
+          { toTable: "DM_HeDaoTao", fromCol: "IDHeDaoTao", toCol: "Id" },
+          { toTable: "DM_LoaiHinhDT", fromCol: "IDLoaiHinhDT", toCol: "Id" },
+          { toTable: "DM_Nganh", fromCol: "IDNganh", toCol: "Id" },
+          { toTable: "DM_ChuyenNganhChiTiet", fromCol: "IDNghe", toCol: "Id" }
+        ]
+      },
+      {
+        id: "DT_MonHocModule",
+        name: "DT_MonHocModule",
+        title: "Bảng môn học dạng module tích hợp",
+        group: "subjects",
+        x: 690, y: 830,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "IDHeDaoTao", type: "int", key: "FK" },
+          { name: "IDMonHoc", type: "int", key: "FK" }
+        ],
+        relations: [
+          { toTable: "DM_MonHoc", fromCol: "IDMonHoc", toCol: "Id" },
+          { toTable: "DM_HeDaoTao", fromCol: "IDHeDaoTao", toCol: "Id" }
+        ]
+      },
+      {
+        id: "DT_ChiTietMonHocModule",
+        name: "DT_ChiTietMonHocModule",
+        title: "Chi tiết các môn thành phần của Module",
+        group: "subjects",
+        x: 1000, y: 830,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "IDMonHocModule", type: "int", key: "FK" },
+          { name: "IDMonHoc", type: "int", key: "FK" },
+          { name: "TrongSoTinhDiem", type: "decimal(18,2)", key: "" }
+        ],
+        relations: [
+          { toTable: "DT_MonHocModule", fromCol: "IDMonHocModule", toCol: "Id" },
+          { toTable: "DM_MonHoc", fromCol: "IDMonHoc", toCol: "Id" }
+        ]
+      },
+
+      // Group 4: Curriculum & Plans
+      {
+        id: "DT_ChuongTrinhKhung",
+        name: "DT_ChuongTrinhKhung",
+        title: "Chương trình khung khóa - ngành",
+        group: "curriculum",
+        x: 1300, y: 150,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "MaChuongTrinhKhung", type: "nvarchar(50)", key: "" },
+          { name: "IDHeDaoTao", type: "int", key: "FK" },
+          { name: "IDLoaiHinhDT", type: "int", key: "FK" },
+          { name: "IDKhoaHoc", type: "int", key: "FK" },
+          { name: "IDNganh", type: "int", key: "FK" },
+          { name: "IDNghe", type: "int", key: "FK" }
+        ],
+        relations: [
+          { toTable: "DM_HeDaoTao", fromCol: "IDHeDaoTao", toCol: "Id" },
+          { toTable: "DM_LoaiHinhDT", fromCol: "IDLoaiHinhDT", toCol: "Id" },
+          { toTable: "DM_KhoaHoc", fromCol: "IDKhoaHoc", toCol: "Id" },
+          { toTable: "DM_Nganh", fromCol: "IDNganh", toCol: "Id" },
+          { toTable: "DM_ChuyenNganhChiTiet", fromCol: "IDNghe", toCol: "Id" }
+        ]
+      },
+      {
+        id: "DT_KhungHocKy",
+        name: "DT_KhungHocKy",
+        title: "Khung học kỳ thuộc Chương trình khung",
+        group: "curriculum",
+        x: 1600, y: 150,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "IDChuongTrinhKhung", type: "int", key: "FK" },
+          { name: "HocKy", type: "tinyint", key: "" },
+          { name: "SoTCBatBuoc", type: "int", key: "" },
+          { name: "SoTCTuChon", type: "int", key: "" }
+        ],
+        relations: [
+          { toTable: "DT_ChuongTrinhKhung", fromCol: "IDChuongTrinhKhung", toCol: "Id" }
+        ]
+      },
+      {
+        id: "DT_ChiTietKhungHocKy",
+        name: "DT_ChiTietKhungHocKy",
+        title: "Môn học chi tiết thuộc Học kỳ CTK",
+        group: "curriculum",
+        x: 1600, y: 350,
+        columns: [
+          { name: "Id", type: "bigint", key: "PK" },
+          { name: "IDKhungHocKy", type: "int", key: "FK" },
+          { name: "IDMonHoc", type: "int", key: "FK" },
+          { name: "LoaiHocPhan", type: "bit", key: "" },
+          { name: "SoTinChi", type: "varchar(50)", key: "" }
+        ],
+        relations: [
+          { toTable: "DT_KhungHocKy", fromCol: "IDKhungHocKy", toCol: "Id" },
+          { toTable: "DM_MonHoc", fromCol: "IDMonHoc", toCol: "Id" }
+        ]
+      },
+      {
+        id: "DT_CTK_NhomTuChon",
+        name: "DT_CTK_NhomTuChon",
+        title: "Nhóm môn học tự chọn của CTK",
+        group: "curriculum",
+        x: 1300, y: 570,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "IDChuongTrinhKhung", type: "int", key: "FK" },
+          { name: "TenNhomTuChon", type: "nvarchar(500)", key: "" },
+          { name: "STCBatBuocCuaNhom", type: "int", key: "" }
+        ],
+        relations: [
+          { toTable: "DT_ChuongTrinhKhung", fromCol: "IDChuongTrinhKhung", toCol: "Id" }
+        ]
+      },
+      {
+        id: "DT_CTK_ChiTietNhomTuChon",
+        name: "DT_CTK_ChiTietNhomTuChon",
+        title: "Chi tiết các môn thuộc nhóm tự chọn",
+        group: "curriculum",
+        x: 1600, y: 570,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "IDNhomTuChon", type: "int", key: "FK" },
+          { name: "IDMonHoc", type: "int", key: "FK" }
+        ],
+        relations: [
+          { toTable: "DT_CTK_NhomTuChon", fromCol: "IDNhomTuChon", toCol: "Id" },
+          { toTable: "DM_MonHoc", fromCol: "IDMonHoc", toCol: "Id" }
+        ]
+      },
+      {
+        id: "KT_NC_KeHoachDaoTao",
+        name: "KT_NC_KeHoachDaoTao",
+        title: "Kế hoạch đào tạo chi tiết học kỳ",
+        group: "curriculum",
+        x: 1300, y: 380,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "IDKhoaHoc", type: "int", key: "FK" },
+          { name: "IDNganh", type: "int", key: "FK" },
+          { name: "IDDot", type: "int", key: "FK" },
+          { name: "HocKy", type: "tinyint", key: "" }
+        ],
+        relations: [
+          { toTable: "DM_KhoaHoc", fromCol: "IDKhoaHoc", toCol: "Id" },
+          { toTable: "DM_Nganh", fromCol: "IDNganh", toCol: "Id" },
+          { toTable: "DM_Dot", fromCol: "IDDot", toCol: "Id" }
+        ]
+      },
+
+      // Group 5: Classes & Distribution
+      {
+        id: "DM_LopHoc",
+        name: "DM_LopHoc",
+        title: "Lớp học hành chính",
+        group: "classes",
+        x: 1900, y: 150,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "MaLopChu", type: "nvarchar(100)", key: "" },
+          { name: "TenLop", type: "nvarchar(100)", key: "" },
+          { name: "IDKhoaHoc", type: "int", key: "FK" },
+          { name: "IDHeDaoTao", type: "int", key: "FK" },
+          { name: "IDLoaiHinhDT", type: "int", key: "FK" },
+          { name: "IDNganh", type: "int", key: "FK" },
+          { name: "IDNghe", type: "int", key: "FK" }
+        ],
+        relations: [
+          { toTable: "DM_KhoaHoc", fromCol: "IDKhoaHoc", toCol: "Id" },
+          { toTable: "DM_HeDaoTao", fromCol: "IDHeDaoTao", toCol: "Id" },
+          { toTable: "DM_LoaiHinhDT", fromCol: "IDLoaiHinhDT", toCol: "Id" },
+          { toTable: "DM_Nganh", fromCol: "IDNganh", toCol: "Id" },
+          { toTable: "DM_ChuyenNganhChiTiet", fromCol: "IDNghe", toCol: "Id" }
+        ]
+      },
+      {
+        id: "DT_PhanMonLopHoc",
+        name: "DT_PhanMonLopHoc",
+        title: "Bảng học kỳ phân môn cho Lớp học",
+        group: "classes",
+        x: 1900, y: 400,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "IDLopHoc", type: "int", key: "FK" },
+          { name: "HocKy", type: "tinyint", key: "" },
+          { name: "SoTCBatBuoc", type: "int", key: "" }
+        ],
+        relations: [
+          { toTable: "DM_LopHoc", fromCol: "IDLopHoc", toCol: "Id" }
+        ]
+      },
+      {
+        id: "DT_ChiTietPhanMonLopHoc",
+        name: "DT_ChiTietPhanMonLopHoc",
+        title: "Bảng phân môn chi tiết cho Lớp học",
+        group: "classes",
+        x: 1900, y: 600,
+        columns: [
+          { name: "Id", type: "bigint", key: "PK" },
+          { name: "IDPhanMon", type: "int", key: "FK" },
+          { name: "IDMonHoc", type: "int", key: "FK" },
+          { name: "SoTinChi", type: "varchar(20)", key: "" }
+        ],
+        relations: [
+          { toTable: "DT_PhanMonLopHoc", fromCol: "IDPhanMon", toCol: "Id" },
+          { toTable: "DM_MonHoc", fromCol: "IDMonHoc", toCol: "Id" }
+        ]
+      },
+
+      // Group 6: Schedule & Faculty
+      {
+        id: "DM_GiangVien",
+        name: "DM_GiangVien",
+        title: "Danh sách giảng viên",
+        group: "schedule",
+        x: 2200, y: 10,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "MaGiangVien", type: "varchar(20)", key: "" },
+          { name: "HoDem", type: "nvarchar(100)", key: "" },
+          { name: "Ten", type: "nvarchar(50)", key: "" }
+        ],
+        relations: []
+      },
+      {
+        id: "TKB_MonHocGiangVien",
+        name: "TKB_MonHocGiangVien",
+        title: "Phân công giảng viên dạy môn học",
+        group: "schedule",
+        x: 2200, y: 170,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "IDGiangVien", type: "int", key: "FK" },
+          { name: "IDMonHoc", type: "int", key: "FK" },
+          { name: "IDDot", type: "int", key: "FK" }
+        ],
+        relations: [
+          { toTable: "DM_GiangVien", fromCol: "IDGiangVien", toCol: "Id" },
+          { toTable: "DM_MonHoc", fromCol: "IDMonHoc", toCol: "Id" },
+          { toTable: "DM_Dot", fromCol: "IDDot", toCol: "Id" }
+        ]
+      },
+      {
+        id: "TKB_LopHocPhan",
+        name: "TKB_LopHocPhan",
+        title: "Bảng thông tin Lớp học phần",
+        group: "schedule",
+        x: 2200, y: 390,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "MaLopHocPhan", type: "nvarchar(50)", key: "" },
+          { name: "IDMonHoc", type: "int", key: "FK" },
+          { name: "IDDot", type: "int", key: "FK" },
+          { name: "SiSoDangKy", type: "int", key: "" }
+        ],
+        relations: [
+          { toTable: "DM_MonHoc", fromCol: "IDMonHoc", toCol: "Id" },
+          { toTable: "DM_Dot", fromCol: "IDDot", toCol: "Id" }
+        ]
+      },
+      {
+        id: "TKB_LichHoc",
+        name: "TKB_LichHoc",
+        title: "Lịch học chi tiết của Lớp học phần",
+        group: "schedule",
+        x: 2200, y: 620,
+        columns: [
+          { name: "Id", type: "int", key: "PK" },
+          { name: "IDLopXepLichHoc", type: "int", key: "FK" },
+          { name: "Thu", type: "tinyint", key: "" },
+          { name: "TuTiet", type: "tinyint", key: "" },
+          { name: "DenTiet", type: "tinyint", key: "" }
+        ],
+        relations: [
+          { toTable: "TKB_LopHocPhan", fromCol: "IDLopXepLichHoc", toCol: "Id" }
+        ]
+      }
+    ];
+
+    // VIEW STATE MANAGEMENT
+    const activeGroups = {
+      general: true,
+      majors: true,
+      subjects: true,
+      curriculum: true,
+      classes: true,
+      schedule: true
+    };
+
+    let scale = 0.65;
+    let offset = { x: 80, y: 50 };
+    let activeDragNode = null;
+    let dragOffset = { x: 0, y: 0 };
+    let isPanning = false;
+    let panOffset = { x: 0, y: 0 };
+    
+    const svg = document.getElementById("svg-canvas");
+    const svgRect = svg.getBoundingClientRect();
+    
+    // UTILITY DRAG & ZOOM COORDINATE MAP
+    function getViewportCoords(clientX, clientY) {
+      const rect = svg.getBoundingClientRect();
+      return {
+        x: (clientX - rect.left - offset.x) / scale,
+        y: (clientY - rect.top - offset.y) / scale
+      };
+    }
+    
+    function getCardHeight(node) {
+      // Header: 42px. Row height: 24px. Padding: 8px. Border correction.
+      return 52 + node.columns.length * 24;
+    }
+    
+    // ANCHOR CALCULATION BETWEEN NEAREST EDGES
+    function getClosestAnchors(nodeA, nodeB, w, hA, hB) {
+      const centerA = { x: nodeA.x + w / 2, y: nodeA.y + hA / 2 };
+      const centerB = { x: nodeB.x + w / 2, y: nodeB.y + hB / 2 };
+      
+      let startX, startY, endX, endY;
+      const dx = centerB.x - centerA.x;
+      const dy = centerB.y - centerA.y;
+      
+      if (Math.abs(dx) > Math.abs(dy)) {
+        if (dx > 0) {
+          startX = nodeA.x + w;
+          startY = centerA.y;
+          endX = nodeB.x;
+          endY = centerB.y;
+        } else {
+          startX = nodeA.x;
+          startY = centerA.y;
+          endX = nodeB.x + w;
+          endY = centerB.y;
+        }
+      } else {
+        if (dy > 0) {
+          startX = centerA.x;
+          startY = nodeA.y + hA;
+          endX = centerB.x;
+          endY = nodeB.y;
+        } else {
+          startX = centerA.x;
+          startY = nodeA.y;
+          endX = centerB.x;
+          endY = nodeB.y + hB;
+        }
+      }
+      return { startX, startY, endX, endY };
+    }
+    
+    // VIEWPORT RE-RENDER
+    function updateTransform() {
+      const viewport = document.getElementById("viewport");
+      viewport.setAttribute("transform", `translate(${offset.x}, ${offset.y}) scale(${scale})`);
+    }
+    
+    function resetZoom() {
+      scale = 0.65;
+      offset = { x: 80, y: 50 };
+      updateTransform();
+    }
+    
+    function fitToScreen() {
+      const activeNodes = tables.filter(t => activeGroups[t.group]);
+      if (activeNodes.length === 0) return;
+      
+      let minX = Infinity, maxX = -Infinity;
+      let minY = Infinity, maxY = -Infinity;
+      
+      activeNodes.forEach(node => {
+        const h = getCardHeight(node);
+        if (node.x < minX) minX = node.x;
+        if (node.x + 240 > maxX) maxX = node.x + 240;
+        if (node.y < minY) minY = node.y;
+        if (node.y + h > maxY) maxY = node.y + h;
+      });
+      
+      const padding = 80;
+      const diagramW = maxX - minX + padding * 2;
+      const diagramH = maxY - minY + padding * 2;
+      
+      const stage = document.getElementById("stage-container");
+      const stageW = stage.clientWidth;
+      const stageH = stage.clientHeight;
+      
+      scale = Math.min(stageW / diagramW, stageH / diagramH);
+      scale = Math.max(0.15, Math.min(1.2, scale));
+      
+      offset.x = (stageW - (maxX + minX) * scale) / 2;
+      offset.y = (stageH - (maxY + minY) * scale) / 2;
+      
+      updateTransform();
+    }
+    
+    // MOUSE ACTION HANDLERS
+    const stage = document.getElementById("stage-container");
+    
+    // Zooming
+    stage.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      const rect = svg.getBoundingClientRect();
+      const mouseCoordsBefore = getViewportCoords(e.clientX, e.clientY);
+      
+      const zoomFactor = 1.08;
+      if (e.deltaY < 0) {
+        scale *= zoomFactor;
+      } else {
+        scale /= zoomFactor;
+      }
+      
+      scale = Math.max(0.12, Math.min(3, scale));
+      
+      offset.x = e.clientX - rect.left - mouseCoordsBefore.x * scale;
+      offset.y = e.clientY - rect.top - mouseCoordsBefore.y * scale;
+      
+      updateTransform();
+    });
+    
+    // Panning & Dragging
+    stage.addEventListener("mousedown", (e) => {
+      const cardHeader = e.target.closest(".card-header");
+      if (cardHeader) {
+        const card = cardHeader.closest(".table-card");
+        const tableId = card.getAttribute("data-id");
+        activeDragNode = tables.find(t => t.id === tableId);
+        
+        const coords = getViewportCoords(e.clientX, e.clientY);
+        dragOffset.x = coords.x - activeDragNode.x;
+        dragOffset.y = coords.y - activeDragNode.y;
+        
+        e.preventDefault();
+        return;
+      }
+      
+      if (e.target.closest("#svg-canvas")) {
+        isPanning = true;
+        panOffset.x = e.clientX - offset.x;
+        panOffset.y = e.clientY - offset.y;
+      }
+    });
+    
+    document.addEventListener("mousemove", (e) => {
+      if (activeDragNode) {
+        const coords = getViewportCoords(e.clientX, e.clientY);
+        const newX = coords.x - dragOffset.x;
+        const newY = coords.y - dragOffset.y;
+        
+        activeDragNode.x = newX;
+        activeDragNode.y = newY;
+        
+        const cardElement = document.querySelector(`foreignObject[data-id="${activeDragNode.id}"]`);
+        if (cardElement) {
+          cardElement.setAttribute("x", newX);
+          cardElement.setAttribute("y", newY);
+        }
+        drawLines();
+      } else if (isPanning) {
+        offset.x = e.clientX - panOffset.x;
+        offset.y = e.clientY - panOffset.y;
+        updateTransform();
+      }
+    });
+    
+    document.addEventListener("mouseup", () => {
+      activeDragNode = null;
+      isPanning = false;
+    });
+
+    // RENDER LOGICS
+    function renderSidebarList() {
+      const list = document.getElementById("sidebar-list");
+      list.innerHTML = "";
+      
+      // Sort tables alphabetically
+      const sortedTables = [...tables].sort((a, b) => a.name.localeCompare(b.name));
+      
+      sortedTables.forEach(table => {
+        const item = document.createElement("div");
+        item.setAttribute("class", "sidebar-list-item");
+        item.setAttribute("data-id", table.id);
+        item.setAttribute("data-group", table.group);
+        item.onclick = () => focusTable(table.id);
+        
+        // Group names mapping
+        const groupLabels = {
+          general: "Chung",
+          majors: "Khóa Ngành",
+          subjects: "Môn học",
+          curriculum: "Khung CTK",
+          classes: "Lớp học",
+          schedule: "Lịch học"
+        };
+        
+        item.innerHTML = `
+          <span style="font-weight: 500; font-family: monospace;">${table.name}</span>
+          <span class="table-badge badge-${table.group}">${groupLabels[table.group]}</span>
+        `;
+        list.appendChild(item);
+      });
+    }
+    
+    function renderDiagram() {
+      const nodesGroup = document.getElementById("nodes-group");
+      nodesGroup.innerHTML = "";
+      
+      tables.forEach(table => {
+        if (!activeGroups[table.group]) return;
+        
+        const fObj = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
+        fObj.setAttribute("x", table.x);
+        fObj.setAttribute("y", table.y);
+        fObj.setAttribute("width", 240);
+        fObj.setAttribute("height", getCardHeight(table));
+        fObj.setAttribute("class", "table-card");
+        fObj.setAttribute("data-id", table.id);
+        
+        // HTML Structure
+        fObj.innerHTML = `
+          <div class="card-container group-${table.group}">
+            <div class="card-header">
+              <span style="font-family: monospace; font-size: 12px; word-break: break-all;">${table.name}</span>
+              <span class="card-title-sub">${table.title}</span>
+            </div>
+            <div class="card-cols">
+              ${table.columns.map(col => `
+                <div class="col-row ${col.key ? 'key-' + col.key.toLowerCase() : ''}">
+                  <span class="col-key-icon">${col.key || ''}</span>
+                  <span class="col-name" title="${col.name}">${col.name}</span>
+                  <span class="col-type">${col.type}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        
+        // Hover listeners
+        fObj.addEventListener("mouseenter", () => highlightConnections(table.id));
+        fObj.addEventListener("mouseleave", () => clearHighlights());
+        
+        nodesGroup.appendChild(fObj);
+      });
+      
+      drawLines();
+    }
+    
+    function drawLines() {
+      const linesGroup = document.getElementById("lines-group");
+      linesGroup.innerHTML = "";
+      
+      tables.forEach(table => {
+        if (!activeGroups[table.group]) return;
+        
+        table.relations.forEach(rel => {
+          const targetTable = tables.find(t => t.id === rel.toTable);
+          if (!targetTable || !activeGroups[targetTable.group]) return;
+          
+          const hA = getCardHeight(table);
+          const hB = getCardHeight(targetTable);
+          const { startX, startY, endX, endY } = getClosestAnchors(table, targetTable, 240, hA, hB);
+          
+          // Bezier curves
+          const dx = Math.abs(endX - startX);
+          const dy = Math.abs(endY - startY);
+          let cp1x = startX;
+          let cp1y = startY;
+          let cp2x = endX;
+          let cp2y = endY;
+          
+          if (startX !== endX && startY !== endY) {
+            if (dx > dy) {
+              cp1x = startX + (endX - startX) * 0.45;
+              cp2x = endX - (endX - startX) * 0.45;
+            } else {
+              cp1y = startY + (endY - startY) * 0.45;
+              cp2y = endY - (endY - startY) * 0.45;
+            }
+          }
+          
+          const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          path.setAttribute("d", `M ${startX} ${startY} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${endX} ${endY}`);
+          path.setAttribute("class", "relation-line");
+          path.setAttribute("data-from", table.id);
+          path.setAttribute("data-to", rel.toTable);
+          path.setAttribute("marker-end", "url(#arrow)");
+          
+          linesGroup.appendChild(path);
+        });
+      });
+    }
+    
+    // HIGHLIGHT & FOCUS LOGIC
+    function highlightConnections(tableId) {
+      const connectedTableIds = new Set([tableId]);
+      const lines = document.querySelectorAll(".relation-line");
+      
+      lines.forEach(line => {
+        const from = line.getAttribute("data-from");
+        const to = line.getAttribute("data-to");
+        
+        if (from === tableId || to === tableId) {
+          line.classList.add("highlighted");
+          line.classList.remove("faded");
+          line.setAttribute("marker-end", "url(#arrow-active)");
+          connectedTableIds.add(from);
+          connectedTableIds.add(to);
+        } else {
+          line.classList.add("faded");
+          line.classList.remove("highlighted");
+          line.setAttribute("marker-end", "url(#arrow)");
+        }
+      });
+      
+      const cards = document.querySelectorAll(".table-card");
+      cards.forEach(card => {
+        const cardId = card.getAttribute("data-id");
+        if (connectedTableIds.has(cardId)) {
+          card.classList.add("highlighted");
+          card.classList.remove("faded");
+        } else {
+          card.classList.add("faded");
+          card.classList.remove("highlighted");
+        }
+      });
+    }
+    
+    function clearHighlights() {
+      const lines = document.querySelectorAll(".relation-line");
+      lines.forEach(line => {
+        line.classList.remove("highlighted", "faded");
+        line.setAttribute("marker-end", "url(#arrow)");
+      });
+      const cards = document.querySelectorAll(".table-card");
+      cards.forEach(card => {
+        card.classList.remove("highlighted", "faded");
+      });
+    }
+    
+    function focusTable(tableId) {
+      const table = tables.find(t => t.id === tableId);
+      if (!table) return;
+      
+      if (!activeGroups[table.group]) {
+        toggleGroup(table.group);
+      }
+      
+      const stageW = stage.clientWidth;
+      const stageH = stage.clientHeight;
+      
+      scale = 0.95;
+      const h = getCardHeight(table);
+      
+      // Calculate centering offset
+      offset.x = stageW / 2 - (table.x + 120) * scale;
+      offset.y = stageH / 2 - (table.y + h / 2) * scale;
+      
+      updateTransform();
+      highlightConnections(tableId);
+      
+      // Flash table card border
+      const cardElement = document.querySelector(`foreignObject[data-id="${tableId}"]`);
+      if (cardElement) {
+        cardElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+    
+    // SEARCH BAR HANDLER
+    function searchTables(query) {
+      query = query.toLowerCase().trim();
+      const listItems = document.querySelectorAll(".sidebar-list-item");
+      const cards = document.querySelectorAll(".table-card");
+      const lines = document.querySelectorAll(".relation-line");
+      
+      if (!query) {
+        listItems.forEach(item => item.style.display = "");
+        cards.forEach(card => card.classList.remove("faded", "highlighted"));
+        lines.forEach(line => line.classList.remove("faded", "highlighted"));
+        return;
+      }
+      
+      const matchingTableIds = new Set();
+      tables.forEach(table => {
+        const nameMatch = table.name.toLowerCase().includes(query);
+        const titleMatch = table.title.toLowerCase().includes(query);
+        const colMatch = table.columns.some(col => col.name.toLowerCase().includes(query));
+        
+        if (nameMatch || titleMatch || colMatch) {
+          matchingTableIds.add(table.id);
+        }
+      });
+      
+      listItems.forEach(item => {
+        const tableId = item.getAttribute("data-id");
+        item.style.display = matchingTableIds.has(tableId) ? "" : "none";
+      });
+      
+      cards.forEach(card => {
+        const tableId = card.getAttribute("data-id");
+        if (matchingTableIds.has(tableId)) {
+          card.classList.add("highlighted");
+          card.classList.remove("faded");
+        } else {
+          card.classList.add("faded");
+          card.classList.remove("highlighted");
+        }
+      });
+      
+      lines.forEach(line => {
+        const from = line.getAttribute("data-from");
+        const to = line.getAttribute("data-to");
+        if (matchingTableIds.has(from) && matchingTableIds.has(to)) {
+          line.classList.add("highlighted");
+          line.classList.remove("faded");
+        } else {
+          line.classList.add("faded");
+          line.classList.remove("highlighted");
+        }
+      });
+    }
+
+    // FILTER GROUP HANDLER
+    function toggleGroup(groupName) {
+      activeGroups[groupName] = !activeGroups[groupName];
+      const btn = document.querySelector(`.filter-btn[data-group="${groupName}"]`);
+      
+      if (activeGroups[groupName]) {
+        btn.classList.add("active");
+      } else {
+        btn.classList.remove("active");
+      }
+      
+      // Update sidebar items visibility
+      const sidebarItems = document.querySelectorAll(".sidebar-list-item");
+      sidebarItems.forEach(item => {
+        if (item.getAttribute("data-group") === groupName) {
+          item.style.opacity = activeGroups[groupName] ? "1" : "0.3";
+          item.style.pointerEvents = activeGroups[groupName] ? "auto" : "none";
+        }
+      });
+      
+      renderDiagram();
+    }
+    
+    // LIGHT & DARK THEME TOGGLE
+    function toggleTheme() {
+      const html = document.documentElement;
+      const themeBtn = document.getElementById("theme-toggle");
+      const darkIcon = themeBtn.querySelector(".dark-icon");
+      const lightIcon = themeBtn.querySelector(".light-icon");
+      
+      if (html.classList.contains("dark")) {
+        html.classList.remove("dark");
+        darkIcon.style.display = "block";
+        lightIcon.style.display = "none";
+      } else {
+        html.classList.add("dark");
+        darkIcon.style.display = "none";
+        lightIcon.style.display = "block";
+      }
+    }
+
+    // INITIALIZATION
+    window.onload = () => {
+      renderSidebarList();
+      renderDiagram();
+      updateTransform();
+      setTimeout(() => {
+        fitToScreen();
+        // Auto-focus table from URL hash
+        if (window.location.hash) {
+          const tableId = window.location.hash.substring(1);
+          focusTable(tableId);
+        }
+      }, 100);
+    };
+    
+    // Handle hash change to focus table dynamically
+    window.onhashchange = () => {
+      if (window.location.hash) {
+        const tableId = window.location.hash.substring(1);
+        focusTable(tableId);
+      }
+    };
+    
+    // Handle Window Resize
+    window.onresize = () => {
+      fitToScreen();
+    };
+  </script>
+</body>
+</html>

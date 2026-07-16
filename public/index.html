@@ -1,0 +1,3617 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý Tiến độ & Cấu trúc Phân hệ Chương trình Đào tạo</title>
+  
+  <!-- Firebase Config Script (local file CORS bypass) -->
+  <script src="firebase_config.js"></script>
+  <script src="sql_tables_schema.js"></script>
+  
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* DESIGN SYSTEM & VARIABLES */
+    :root {
+      --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      --card-bg: #ffffff;
+      --card-border: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --accent-color: #4f46e5;
+      --accent-hover: #4338ca;
+      --accent-light: #e0e7ff;
+      --sidebar-bg: #ffffff;
+      --sidebar-border: #e2e8f0;
+      --item-hover: #f8fafc;
+      
+      --status-todo-bg: #f1f5f9;
+      --status-todo-text: #475569;
+      --status-todo-border: #cbd5e1;
+      
+      --status-progress-bg: #e0f2fe;
+      --status-progress-text: #0284c7;
+      --status-progress-border: #bae6fd;
+      
+      --status-done-bg: #dcfce7;
+      --status-done-text: #15803d;
+      --status-done-border: #86efac;
+      
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+      --glass-bg: rgba(255, 255, 255, 0.8);
+      --glass-border: rgba(226, 232, 240, 0.8);
+      --scrollbar-thumb: #cbd5e1;
+    }
+    
+    html.dark {
+      --bg-gradient: radial-gradient(circle at top left, #0f172a 0%, #020617 100%);
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --card-border: rgba(255, 255, 255, 0.06);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-color: #6366f1;
+      --accent-hover: #4f46e5;
+      --accent-light: rgba(99, 102, 241, 0.15);
+      --sidebar-bg: rgba(15, 23, 42, 0.9);
+      --sidebar-border: rgba(255, 255, 255, 0.06);
+      --item-hover: rgba(255, 255, 255, 0.03);
+      
+      --status-todo-bg: rgba(71, 85, 105, 0.2);
+      --status-todo-text: #94a3b8;
+      --status-todo-border: rgba(148, 163, 184, 0.3);
+      
+      --status-progress-bg: rgba(2, 132, 199, 0.15);
+      --status-progress-text: #38bdf8;
+      --status-progress-border: rgba(56, 189, 248, 0.3);
+      
+      --status-done-bg: rgba(21, 128, 61, 0.15);
+      --status-done-text: #4ade80;
+      --status-done-border: rgba(74, 222, 128, 0.3);
+      
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+      --glass-bg: rgba(15, 23, 42, 0.6);
+      --glass-border: rgba(255, 255, 255, 0.05);
+      --scrollbar-thumb: #334155;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* SCROLLBAR STYLE */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--scrollbar-thumb);
+      border-radius: 999px;
+    }
+    
+    /* TOP HEADER BAR */
+    header {
+      height: 70px;
+      background: var(--sidebar-bg);
+      border-bottom: 1px solid var(--sidebar-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+      backdrop-filter: blur(8px);
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .logo-badge {
+      background: var(--accent-color);
+      color: #ffffff;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+      letter-spacing: 0.5px;
+    }
+    
+    .header-title-container h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+    }
+    
+    .header-title-container p {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 1px;
+    }
+    
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .btn {
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--card-border);
+      background: var(--card-bg);
+      color: var(--text-main);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.15s ease;
+    }
+    
+    .btn:hover {
+      background: var(--item-hover);
+      transform: translateY(-1px);
+    }
+    
+    .btn:active {
+      transform: translateY(0);
+    }
+    
+    .theme-toggle-btn {
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      justify-content: center;
+      border-radius: 50%;
+    }
+    
+    /* WORKSPACE BODY */
+    .workspace {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    /* SIDEBAR */
+    aside {
+      width: 320px;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--sidebar-border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      overflow-y: auto;
+      padding: 24px 20px;
+      gap: 24px;
+    }
+    
+    .sidebar-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    
+    .search-container {
+      position: relative;
+    }
+    
+    .search-input {
+      width: 100%;
+      background: var(--bg-gradient);
+      border: 1px solid var(--card-border);
+      padding: 10px 14px 10px 36px;
+      font-size: 13px;
+      border-radius: 8px;
+      color: var(--text-main);
+      outline: none;
+    }
+    
+    .search-input:focus {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 2px var(--accent-light);
+    }
+    
+    .search-icon-svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      height: 14px;
+      fill: var(--text-muted);
+      pointer-events: none;
+    }
+    
+    /* FILTER CHIPS */
+    .filter-chips {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .filter-chip {
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-main);
+    }
+    
+    .filter-chip:hover {
+      background: var(--item-hover);
+    }
+    
+    .filter-chip.active {
+      background: var(--accent-light);
+      color: var(--accent-color);
+      border-color: rgba(99, 102, 241, 0.2);
+    }
+    
+    .chip-count {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.05);
+    }
+    html.dark .chip-count {
+      background: rgba(255, 255, 255, 0.08);
+    }
+    
+    /* PROGRESS BAR IN SIDEBAR */
+    .progress-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 10px;
+    }
+    
+    .progress-header h3 {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    .progress-pct {
+      font-family: 'Outfit', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent-color);
+    }
+    
+    .progress-bar-container {
+      width: 100%;
+      height: 8px;
+      background: var(--bg-gradient);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      border: 1px solid var(--card-border);
+    }
+    
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-color) 0%, #818cf8 100%);
+      width: 0%;
+      border-radius: 999px;
+      transition: width 0.4s ease-out;
+    }
+    
+    .progress-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      text-align: center;
+    }
+    
+    .stat-box {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    
+    .stat-num {
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+    }
+    
+    .stat-label {
+      font-size: 9px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+    
+    /* MAIN PANEL */
+    main {
+      flex: 1;
+      padding: 24px 32px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .main-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    
+    .view-mode-selector {
+      display: flex;
+      background: var(--sidebar-bg);
+      border: 1px solid var(--card-border);
+      padding: 3px;
+      border-radius: 8px;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .view-mode-btn {
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .view-mode-btn.active {
+      background: var(--accent-color);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    /* TREE VIEW MODE */
+    .tree-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .module-node {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .module-header {
+      padding: 16px 20px;
+      background: var(--item-hover);
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+    
+    .module-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .module-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    
+    .module-progress-pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--accent-light);
+      color: var(--accent-color);
+    }
+    
+    .module-body {
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    
+    .group-node {
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    
+    .group-header {
+      padding: 12px 16px;
+      background: rgba(0, 0, 0, 0.01);
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+    html.dark .group-header {
+      background: rgba(255, 255, 255, 0.01);
+    }
+    
+    .group-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .group-body {
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    /* LEAF / SCREEN NODE IN TREE */
+    .screen-item {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .screen-main-row {
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      gap: 16px;
+    }
+    
+    .screen-main-row:hover {
+      background: var(--item-hover);
+    }
+    
+    .screen-info-block {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+    
+    .screen-id-badge {
+      font-family: 'Outfit', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--bg-gradient);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      min-width: 65px;
+      text-align: center;
+    }
+    
+    .screen-title-text {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+    
+    .screen-edu-code {
+      font-family: monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      background: rgba(0, 0, 0, 0.03);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    html.dark .screen-edu-code {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .screen-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    /* STATUS SELECT DROPDOWN */
+    .status-select-container {
+      position: relative;
+    }
+    
+    .status-dropdown {
+      padding: 4px 20px 4px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23475569'%3e%3cpath d='M7 10l5 5 5-5H7z'/%3e%3c/svg%3e");
+      background-position: right 4px center;
+      background-repeat: no-repeat;
+      background-size: 12px;
+      transition: all 0.15s ease;
+    }
+    
+    html.dark .status-dropdown {
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2394a3b8'%3e%3cpath d='M7 10l5 5 5-5H7z'/%3e%3c/svg%3e");
+    }
+
+    .status-dropdown option {
+      background-color: var(--sidebar-bg);
+      color: var(--text-main);
+    }
+    
+    .status-dropdown.todo {
+      background-color: var(--status-todo-bg);
+      color: var(--status-todo-text);
+      border-color: var(--status-todo-border);
+    }
+    
+    .status-dropdown.progress {
+      background-color: var(--status-progress-bg);
+      color: var(--status-progress-text);
+      border-color: var(--status-progress-border);
+    }
+    
+    .status-dropdown.done {
+      background-color: var(--status-done-bg);
+      color: var(--status-done-text);
+      border-color: var(--status-done-border);
+    }
+    
+    .chevron-icon {
+      width: 16px;
+      height: 16px;
+      fill: var(--text-muted);
+      transition: transform 0.2s ease;
+    }
+    
+    .expanded .chevron-icon {
+      transform: rotate(90deg);
+    }
+    
+    .rotated-180 {
+      transform: rotate(180deg);
+    }
+    
+    /* EXPANDED DETAILS PANEL */
+    .screen-detail-panel {
+      padding: 14px;
+      background: var(--item-hover);
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .details-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    
+    .details-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+    
+    .table-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    
+    .table-tag-link {
+      font-family: monospace;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent-color);
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: 4px 8px;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.1s ease;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .table-tag-link:hover {
+      border-color: var(--accent-color);
+      background: var(--accent-light);
+      transform: translateY(-1px);
+    }
+    
+    .desc-textarea {
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 13px;
+      color: var(--text-main);
+      outline: none;
+      resize: vertical;
+      min-height: 60px;
+      font-family: inherit;
+    }
+    
+    .desc-textarea:focus {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 2px var(--accent-light);
+    }
+    
+    .auto-save-indicator {
+      align-self: flex-end;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-style: italic;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .auto-save-indicator.visible {
+      opacity: 1;
+    }
+    
+    /* CARD VIEW GRID MODE */
+    .card-grid-container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    
+    .card-group-section h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid var(--card-border);
+      color: var(--text-main);
+    }
+    
+    .grid-layout {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+    
+    .screen-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+    }
+    
+    .screen-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: rgba(99, 102, 241, 0.2);
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-main);
+      line-height: 1.4;
+    }
+    
+    /* SVG ICONS */
+    .icon-svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+    
+    /* HIDDEN FILE INPUT FOR IMPORT */
+    #import-file-input {
+      display: none;
+    }
+    
+    /* HELPERS */
+    .hidden {
+      display: none !important;
+    }
+
+    /* MODULE SELECTOR */
+    .module-selector-container {
+      margin-left: 20px;
+      position: relative;
+    }
+    #module-select {
+      background: var(--sidebar-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 32px 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 14px;
+      min-width: 220px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.15s ease;
+    }
+    #module-select:focus {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 2px var(--accent-light);
+    }
+
+    /* CLOUD STATUS BADGE */
+    .cloud-status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid transparent;
+    }
+
+    .cloud-status-badge.offline {
+      background: rgba(148, 163, 184, 0.12);
+      color: var(--text-muted);
+      border-color: var(--card-border);
+    }
+    .cloud-status-badge.offline .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--text-muted);
+    }
+
+    .cloud-status-badge.connecting {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border-color: rgba(251, 191, 36, 0.2);
+    }
+    .cloud-status-badge.connecting .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #fbbf24;
+      animation: pulse 1s infinite alternate;
+    }
+
+    .cloud-status-badge.connected {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border-color: rgba(52, 211, 153, 0.2);
+    }
+    .cloud-status-badge.connected .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 6px #10b981;
+    }
+
+    .cloud-status-badge.error {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border-color: rgba(248, 113, 113, 0.2);
+    }
+    .cloud-status-badge.error .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #ef4444;
+    }
+
+    /* TOAST NOTIFICATIONS */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 20000;
+      pointer-events: none;
+    }
+
+    .toast {
+      padding: 12px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: var(--shadow-lg);
+      pointer-events: auto;
+      animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      max-width: 320px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(8px);
+    }
+
+    .toast.info {
+      background: rgba(79, 70, 229, 0.9);
+      color: #ffffff;
+    }
+    .toast.success {
+      background: rgba(16, 185, 129, 0.9);
+      color: #ffffff;
+    }
+    .toast.error {
+      background: rgba(239, 68, 68, 0.9);
+      color: #ffffff;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(12px) scale(0.95); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+    @keyframes pulse {
+      from { opacity: 0.4; }
+      to { opacity: 1; }
+    }
+
+    /* ADMIN SETTINGS MODAL */
+    .admin-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .admin-modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .admin-modal-card {
+      background: var(--sidebar-bg);
+      border: 1px solid var(--card-border);
+      width: 80%;
+      max-width: 1400px;
+      height: 85vh;
+      border-radius: 16px;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transform: translateY(16px) scale(0.98);
+      transition: transform 0.2s ease;
+    }
+    .admin-modal-overlay.active .admin-modal-card {
+      transform: translateY(0) scale(1);
+    }
+    .admin-modal-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--item-hover);
+    }
+    .admin-modal-header h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .close-modal-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 24px;
+      cursor: pointer;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      transition: background 0.15s;
+    }
+    .close-modal-btn:hover {
+      background: rgba(0, 0, 0, 0.05);
+      color: var(--text-main);
+    }
+    .admin-modal-body {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+    .admin-sidebar {
+      width: 180px;
+      border-right: 1px solid var(--card-border);
+      background: var(--item-hover);
+      padding: 16px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .admin-tab-btn {
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      border-radius: 6px;
+      text-align: left;
+      transition: all 0.1s ease;
+    }
+    .admin-tab-btn:hover {
+      background: rgba(0, 0, 0, 0.03);
+      color: var(--text-main);
+    }
+    .admin-tab-btn.active {
+      background: var(--accent-color);
+      color: #ffffff;
+    }
+    .admin-content-area {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .admin-panel-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      border-bottom: 2px solid var(--card-border);
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+    .admin-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .admin-input-group label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .admin-input {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--card-border);
+      background: var(--card-bg);
+      color: var(--text-main);
+      font-size: 13px;
+      outline: none;
+    }
+    .admin-input:focus {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 2px var(--accent-light);
+    }
+    .admin-btn {
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .admin-btn.primary {
+      background: var(--accent-color);
+      color: white;
+    }
+    .admin-btn.primary:hover {
+      background: var(--accent-hover);
+    }
+    .admin-btn.danger {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    .admin-btn.danger:hover {
+      background: #ef4444;
+      color: white;
+    }
+    .admin-btn.secondary {
+      background: rgba(0, 0, 0, 0.05);
+      color: var(--text-main);
+    }
+    .admin-btn.secondary:hover {
+      background: rgba(0, 0, 0, 0.08);
+    }
+    .admin-list-card {
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--card-bg);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-left">
+      <div class="logo-badge">EDU</div>
+      <div class="header-title-container">
+        <h1>Quản lý Tiến độ Phân hệ</h1>
+        <p>Hệ thống theo dõi cấu trúc & tiến độ dự án</p>
+      </div>
+      <!-- Module Selector -->
+      <div class="module-selector-container">
+        <select id="module-select" onchange="switchModule(this.value)">
+          <option value="training_program">Chương trình Đào tạo</option>
+          <option value="admission">Tuyển sinh (Mới)</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="header-right">
+      <!-- Cloud Status Badge -->
+      <div class="cloud-status-badge offline" id="cloud-status-badge" title="Trạng thái kết nối Cloud Sync">
+        <span class="status-dot"></span>
+        <span class="status-text">Local Sync</span>
+      </div>
+
+      <!-- Navigation buttons -->
+      <a href="db_diagram.html" class="btn" title="Xem Sơ đồ Cơ sở Dữ liệu" style="text-decoration:none;">
+        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.04-.42 1.99-1.07 2.75z"/></svg>
+        Sơ đồ DB
+      </a>
+
+      <button class="btn" id="admin-settings-btn" title="Cấu hình hệ thống & Quản trị" onclick="openAdminSettings()">
+        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+        Cấu hình
+      </button>
+
+      <button class="btn" id="export-btn" title="Xuất tiến độ ra file JSON">
+        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+        Export
+      </button>
+      <button class="btn" id="import-btn" title="Nhập tiến độ từ file JSON">
+        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v-4h-4v4H7l5 5 5-5h-3z"/></svg>
+        Import
+      </button>
+      <input type="file" id="import-file-input" accept=".json">
+      
+      <button class="btn" id="reset-btn" title="Reset dữ liệu về ban đầu">
+        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+      </button>
+      
+      <button class="btn theme-toggle-btn" id="theme-btn" title="Đổi giao diện Sáng/Tối">
+        <!-- Moon Icon -->
+        <svg class="icon-svg dark-icon" viewBox="0 0 24 24" style="display: none;"><path d="M10 2c-4.42 0-8 3.58-8 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/></svg>
+        <!-- Sun Icon -->
+        <svg class="icon-svg light-icon" viewBox="0 0 24 24" style="display: block;"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41l-1.06-1.06zm1.06-12.37c-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06c.39-.38.39-1.02 0-1.41zm-12.37 12.37c-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06c.39-.38.39-1.02 0-1.41z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- BODY CONTENT -->
+  <div class="workspace">
+  
+    <!-- SIDEBAR CONTROLS -->
+    <aside>
+      
+      <!-- TIMELINE / PROGRESS -->
+      <div class="progress-panel">
+        <div class="progress-header">
+          <h3>Tiến độ hoàn thành</h3>
+          <span class="progress-pct" id="global-progress-pct">0%</span>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" id="global-progress-bar"></div>
+        </div>
+        <div class="progress-stats-grid">
+          <div class="stat-box">
+            <span class="stat-num" id="stat-total">0</span>
+            <span class="stat-label">Tổng số</span>
+          </div>
+          <div class="stat-box" style="color: var(--status-progress-text)">
+            <span class="stat-num" id="stat-progress">0</span>
+            <span class="stat-label">Đang làm</span>
+          </div>
+          <div class="stat-box" style="color: var(--status-done-text)">
+            <span class="stat-num" id="stat-done">0</span>
+            <span class="stat-label">Xong</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- SEARCH -->
+      <div>
+        <div class="sidebar-section-title">Tìm kiếm màn hình</div>
+        <div class="search-container">
+          <input type="text" class="search-input" id="search-box" placeholder="Mã, tên màn hình, table...">
+          <svg class="search-icon-svg" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        </div>
+      </div>
+      
+      <!-- FILTER STATUS -->
+      <div>
+        <div class="sidebar-section-title">Lọc theo trạng thái</div>
+        <div class="filter-chips">
+          <button class="filter-chip active" data-status="ALL">
+            <span>Tất cả</span>
+            <span class="chip-count" id="chip-all-count">0</span>
+          </button>
+          <button class="filter-chip" data-status="Chưa xử lý">
+            <span>Chưa xử lý</span>
+            <span class="chip-count" id="chip-todo-count">0</span>
+          </button>
+          <button class="filter-chip" data-status="Đang xử lý">
+            <span>Đang xử lý</span>
+            <span class="chip-count" id="chip-progress-count">0</span>
+          </button>
+          <button class="filter-chip" data-status="Đã xử lý">
+            <span>Đã xử lý</span>
+            <span class="chip-count" id="chip-done-count">0</span>
+          </button>
+        </div>
+      </div>
+      
+    </aside>
+    
+    <!-- MAIN WORKSPACE -->
+    <main>
+      
+      <div class="main-header">
+        <div class="header-title-container">
+          <h2 style="font-family: 'Outfit', sans-serif; font-size: 20px;" id="view-title">Cây chương trình đào tạo</h2>
+        </div>
+        
+        <div class="view-mode-selector">
+          <button class="view-mode-btn active" id="view-mode-tree">
+            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M22 11V3h-7v3H9V3H2v8h7V8h2v10H9v-3H2v8h7v-3h2v3h7v-8h-7v3h-2V8h2v3h7zM7 9H4V5h3v4zm0 10H4v-4h3v4zm13 0h-3v-4h3v4zm0-10h-3V5h3v4z"/></svg>
+            Dạng cây (Tree)
+          </button>
+          <button class="view-mode-btn" id="view-mode-card">
+            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M4 14h6v-6H4v6zm0 7h6v-6H4v6zm7-13h6v-6h-6v6zm0 7h6v-6h-6v6zM4 4v3h6V4H4zm13 13h6v-6h-6v6zm0 4h6v-6h-6v6z"/></svg>
+            Dạng lưới (Cards)
+          </button>
+        </div>
+      </div>
+      
+      <!-- RENDER ZONE -->
+      <div id="content-renderer">
+        <!-- Render tree or card view dynamically -->
+      </div>
+      
+    </main>
+    
+  </div>
+
+  <script>
+    // INITIAL EXCEL DATA EMBEDDED
+    const INITIAL_SCREENS = [{"id":"B.6.1.1","name":"Bậc đào tạo","eduCode":"SF021","tables":["DM_HeDaoTao"]},{"id":"B.6.1.2","name":"Loại hình đào tạo","eduCode":"SF022","tables":["DM_LoaiHinhDT"]},{"id":"B.6.1.3","name":"Thời gian đào tạo","eduCode":"SF024","tables":["DM_ThoiGianDaoTao"]},{"id":"B.6.1.4","name":"Ngành đào tạo","eduCode":"SF031","tables":["DM_Nganh"]},{"id":"B.6.1.5","name":"Chuyên ngành đào tạo","eduCode":"SF032","tables":["DM_ChuyenNganhChiTiet"]},{"id":"B.6.1.7","name":"Năm học","eduCode":"SF090","tables":["DM_NamHoc"]},{"id":"B.6.1.8","name":"Khóa học","eduCode":"SF023","tables":["DM_KhoaHoc"]},{"id":"B.6.1.9","name":"Học kỳ - năm học","eduCode":"E021071","tables":["DM_NamHoc","DM_Dot"]},{"id":"B.6.1.10","name":"Khối kiến thức","eduCode":"S010095","tables":["DM_KhoiKienThuc"]},{"id":"B.6.1.11","name":"Hình thức thi","eduCode":"S010096","tables":["DM_HinhThucThi"]},{"id":"B.6.1.12","name":"Tính chất môn học","eduCode":"E020024","tables":["DM_TinhChatMonHoc"]},{"id":"B.6.1.13","name":"Quy định khóa học - ngành đào tạo","eduCode":"E020003","tables":["DM_QuyDinhKhoaNganh"]},{"id":"B.6.1.14","name":"Khối ngành","eduCode":"E020028","tables":["DM_KhoiNganh"]},{"id":"B.6.2.1","name":"Loại môn học","eduCode":"E020009","tables":["DM_NhomMienGiam"]},{"id":"B.6.2.2","name":"Danh sách môn học","eduCode":"SF042","tables":["DM_MonHoc"]},{"id":"B.6.2.3","name":"Quản lý môn học bậc đào tạo","eduCode":"E040004","tables":["DM_MonHocHeDaoTao"]},{"id":"B.6.2.4","name":"Môn học ngoài chương trình","eduCode":"E020013","tables":["DM_MonHocNgoaiChuongTrinh"]},{"id":"B.6.2.5","name":"Nhóm môn học điều kiện","eduCode":"E020015","tables":["DM_NhomMonHocDieuKien"]},{"id":"B.6.2.6","name":"Quản lý môn học thay thế","eduCode":"E040001 (Mode=2, E040001;Mode=2 (v1.2))","tables":["DT_MonHocThayTe"]},{"id":"B.6.2.7","name":"Quản lý môn học module","eduCode":"E041035","tables":["DT_MonHocModule","DT_ChiTietMonHocModule"]},{"id":"B.6.2.8","name":"Quản lý thiết lập nhóm tự chọn","eduCode":"E040030","tables":["DT_CTK_NhomTuChon","DT_CTK_ChiTietNhomTuChon"]},{"id":"B.6.2.9","name":"Môn học điều kiện ràng buộc","eduCode":"E020116","tables":["DM_MonHocRangBuoc"]},{"id":"B.6.2.10","name":"Quản lý môn học theo tổ bộ môn","eduCode":"E034011","tables":["DM_MonHoc"]},{"id":"B.6.2.11","name":"Thống kê môn học thay thế","eduCode":"E040006 (Mode=2, E040006;Mode=2)","tables":["DT_MonHocThayTe"]},{"id":"B.6.2.12","name":"Thống kê loại môn học","eduCode":"E040027","tables":["DM_MonHocHeDaoTao"]},{"id":"B.6.2.13","name":"Thống kê môn học chưa phân công giảng viên giảng dạy","eduCode":"E080019","tables":["TKB_LopHocPhan","TKB_LichHoc"]},{"id":"B.6.2.14","name":"Quản lý đề cương môn học","eduCode":"E041017","tables":["DM_MonHocHeDaoTao"]},{"id":"B.6.2.15","name":"Quản lý duyệt đề cương môn học","eduCode":"E041017 (Mode=2, E041017;Mode=2)","tables":["DM_MonHocHeDaoTao"]},{"id":"B.6.3.1","name":"Quản lý chương trình khung - Tín chỉ","eduCode":"E041001","tables":["DT_ChuongTrinhKhung","DT_KhungHocKy","DT_ChiTietKhungHocKy"]},{"id":"B.6.3.2","name":"Lập chương trình khung - Tín chỉ","eduCode":"","tables":["DT_ChuongTrinhKhung","DT_KhungHocKy","DT_ChiTietKhungHocKy"]},{"id":"B.6.3.3","name":"Khóa chương trình khung","eduCode":"SF301","tables":["DT_ChuongTrinhKhung"]},{"id":"B.6.3.4","name":"Kế hoạch đào tạo - Tín chỉ","eduCode":"SF401 (IsTinChi=true, SF401;IsTinChi=true)","tables":["KT_NC_KeHoachDaoTao"]},{"id":"B.6.3.5","name":"Cấu hình loại hình học chung","eduCode":"E041005","tables":["DM_ThoiGianDaoTao","DT_HeLoaiHocChung"]},{"id":"B.6.3.6","name":"Quản lý cấu hình CTK","eduCode":"","tables":["DT_ChuongTrinhKhung"]},{"id":"B.6.3.7","name":"Cấu hình môn học chung bậc loại","eduCode":"E041005","tables":["DM_ThoiGianDaoTao","DT_HeLoaiHocChung"]},{"id":"B.6.3.8","name":"So sánh chương trình khung","eduCode":"E041006","tables":["DT_ChuongTrinhKhung","DT_KhungHocKy","DT_ChiTietKhungHocKy"]},{"id":"B.6.3.9","name":"Quy định đào tạo","eduCode":"E040014","tables":["DT_QuyDinhDaoTao"]},{"id":"B.6.3.10","name":"Chương trình đào tạo lớp học - môn học","eduCode":"E033050","tables":["DM_LopHoc","DT_PhanMonLopHoc","DT_ChiTietPhanMonLopHoc"]},{"id":"B.6.3.11","name":"Phân công giảng viên - môn học","eduCode":"E080232","tables":["TKB_MonHocGiangVien"]},{"id":"B.6.3.12","name":"Phân môn cho lớp học","eduCode":"SF321","tables":["DM_LopHoc","DT_PhanMonLopHoc","DT_ChiTietPhanMonLopHoc"]},{"id":"B.6.3.13","name":"Phân môn tự động","eduCode":"E055020","tables":["DM_LopHoc","DT_PhanMonLopHoc","DT_ChiTietPhanMonLopHoc"]},{"id":"B.6.3.14","name":"Xem phân môn lớp học","eduCode":"SF322","tables":["DM_LopHoc","DT_PhanMonLopHoc","DT_ChiTietPhanMonLopHoc"]},{"id":"B.6.3.15","name":"Thống kê số tín chỉ CTK - TKB","eduCode":"E040015","tables":["DT_ChuongTrinhKhung"]},{"id":"B.6.3.16","name":"Thống kê môn học theo kế hoạch đào tạo","eduCode":"E040028","tables":["KT_NC_KeHoachDaoTao"]},{"id":"B.6.3.17","name":"Thống kê tình hình khai báo tiến trình CTĐT","eduCode":"","tables":[]},{"id":"B.6.3.18","name":"Thống kê môn học chương trình khung","eduCode":"E040010","tables":["DT_ChuongTrinhKhung"]}];
+    
+    // STATIC MENU STRUCTURE AS DEFINED IN USER REQUEST
+    const MENU_STRUCTURE = [
+      {
+        title: "Module 1: Quản lý môn học",
+        type: "module",
+        items: [
+          { id: "M1_DASHBOARD", name: "Dashboard — Tổng quan số lượng môn học, môn chưa phân công GV, đề cương chưa duyệt, môn thay thế...", type: "dashboard" },
+          {
+            title: "Nhóm 1.1 – Danh mục môn học",
+            type: "group",
+            items: [
+              { id: "B.6.2.1", name: "Loại môn học" },
+              { id: "B.6.1.12", name: "Tính chất môn học" },
+              { id: "B.6.1.11", name: "Hình thức thi" },
+              { id: "B.6.1.10", name: "Khối kiến thức" },
+              { id: "M1_NHOM_MON_DK", name: "Nhóm môn điều kiện", isPlaceholder: true }
+            ]
+          },
+          {
+            title: "Nhóm 1.2 – Quản lý môn học",
+            type: "group",
+            items: [
+              { id: "B.6.2.2", name: "Danh sách môn học" },
+              { id: "B.6.2.3", name: "Quản lý môn học bậc đào tạo" },
+              { id: "B.6.2.4", name: "Môn học ngoài chương trình" },
+              { id: "B.6.2.7", name: "Quản lý môn học module" },
+              { id: "B.6.2.10", name: "Quản lý môn học theo tổ bộ môn" },
+              { id: "B.6.3.11", name: "Phân công giảng viên - môn học" },
+              { id: "B.6.3.12", name: "Phân môn cho lớp học" },
+              { id: "B.6.3.13", name: "Phân môn tự động" },
+              { id: "B.6.3.14", name: "Xem phân môn lớp học" }
+            ]
+          },
+          {
+            title: "Nhóm 1.3 – Môn học điều kiện & thay thế",
+            type: "group",
+            items: [
+              { id: "B.6.2.5", name: "Nhóm môn học điều kiện" },
+              { id: "B.6.2.6", name: "Quản lý môn học thay thế" },
+              { id: "B.6.2.8", name: "Quản lý thiết lập nhóm tự chọn" },
+              { id: "B.6.2.9", name: "Môn học điều kiện ràng buộc" }
+            ]
+          },
+          {
+            title: "Nhóm 1.4 – Đề cương môn học",
+            type: "group",
+            items: [
+              { id: "B.6.2.14", name: "Quản lý đề cương môn học" },
+              { id: "B.6.2.15", name: "Quản lý duyệt đề cương môn học" }
+            ]
+          },
+          {
+            title: "Nhóm 1.5 – Thống kê môn học",
+            type: "group",
+            items: [
+              { id: "B.6.2.11", name: "Thống kê môn học thay thế" },
+              { id: "B.6.2.12", name: "Thống kê loại môn học" },
+              { id: "B.6.2.13", name: "Thống kê môn học chưa phân công giảng viên" }
+            ]
+          }
+        ]
+      },
+      {
+        title: "Module 2: Chương trình khung",
+        type: "module",
+        items: [
+          { id: "M2_DASHBOARD", name: "Dashboard", type: "dashboard" },
+          {
+            title: "Nhóm 2.1 – Khai báo cơ cấu đào tạo",
+            type: "group",
+            items: [
+              { id: "B.6.1.7", name: "Năm học" },
+              { id: "B.6.1.8", name: "Khóa học" },
+              { id: "B.6.1.9", name: "Học kỳ - năm học" },
+              { id: "B.6.1.13", name: "Quy định khóa học - ngành đào tạo" },
+              { id: "B.6.1.1", name: "Bậc đào tạo" },
+              { id: "B.6.1.2", name: "Loại hình đào tạo" },
+              { id: "B.6.1.3", name: "Thời gian đào tạo" },
+              { id: "B.6.1.4", name: "Ngành đào tạo" },
+              { id: "B.6.1.5", name: "Chuyên ngành đào tạo" },
+              { id: "B.6.1.14", name: "Khối ngành" }
+            ]
+          },
+          {
+            title: "Nhóm 2.2 – Lập & quản lý chương trình khung",
+            type: "group",
+            items: [
+              { id: "B.6.3.1", name: "Quản lý chương trình khung - Tín chỉ" },
+              { id: "B.6.3.2", name: "Lập chương trình khung - Tín chỉ" },
+              { id: "B.6.3.3", name: "Khóa chương trình khung" },
+              { id: "B.6.3.8", name: "So sánh chương trình khung" },
+              { id: "B.6.3.6", name: "Quản lý cấu hình CTK" },
+              { id: "B.6.3.5", name: "Cấu hình loại hình học chung" },
+              { id: "B.6.3.7", name: "Cấu hình môn học chung bậc loại" },
+              { id: "B.6.3.9", name: "Quy định đào tạo" },
+              { id: "B.6.3.10", name: "Chương trình đào tạo lớp học - môn học" },
+              { id: "B.6.3.4", name: "Kế hoạch đào tạo - Tín chỉ" }
+            ]
+          },
+          {
+            title: "Nhóm 2.5 – Thống kê chương trình khung",
+            type: "group",
+            items: [
+              { id: "B.6.3.15", name: "Thống kê số tín chỉ CTK - TKB" },
+              { id: "B.6.3.16", name: "Thống kê môn học theo kế hoạch đào tạo" },
+              { id: "B.6.3.17", name: "Thống kê tình hình khai báo tiến trình CTĐT" },
+              { id: "B.6.3.18", name: "Thống kê môn học chương trình khung" }
+            ]
+          }
+        ]
+      }
+    ];
+
+    // APPLICATION STATE
+    let screensMap = {};
+    let activeFilter = 'ALL';
+    let searchQuery = '';
+    let viewMode = 'tree'; // 'tree' | 'card'
+    let collapsedNodes = {}; // Tracks expanded state for tree nodes
+
+    // LOCAL STORAGE CONFIG
+    const STORAGE_KEY = 'edu_menu_manager_progress_v2';
+
+    // INITIALIZE DATA
+    function initData() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          screensMap = JSON.parse(saved);
+          
+          INITIAL_SCREENS.forEach(sc => {
+            if (!screensMap[sc.id]) {
+              screensMap[sc.id] = {
+                ...sc,
+                description: '',
+                status: 'Chưa xử lý'
+              };
+            } else {
+              screensMap[sc.id].eduCode = sc.eduCode;
+              screensMap[sc.id].tables = sc.tables;
+              if (screensMap[sc.id].name !== sc.name) {
+                screensMap[sc.id].name = sc.name;
+              }
+            }
+          });
+          return;
+        } catch (e) {
+          console.error("Lỗi parse LocalStorage, reset dữ liệu.", e);
+        }
+      }
+      
+      screensMap = {};
+      INITIAL_SCREENS.forEach(sc => {
+        screensMap[sc.id] = {
+          id: sc.id,
+          name: sc.name,
+          eduCode: sc.eduCode,
+          tables: sc.tables,
+          description: '',
+          status: 'Chưa xử lý'
+        };
+      });
+      
+      const extraItems = [
+        { id: "M1_DASHBOARD", name: "Dashboard — Tổng quan số lượng môn học, môn chưa phân công GV, đề cương chưa duyệt, môn thay thế...", eduCode: "-", tables: [] },
+        { id: "M2_DASHBOARD", name: "Dashboard", eduCode: "-", tables: [] },
+        { id: "M1_NHOM_MON_DK", name: "Nhóm môn điều kiện", eduCode: "-", tables: [] }
+      ];
+      
+      extraItems.forEach(item => {
+        if (!screensMap[item.id]) {
+          screensMap[item.id] = {
+            id: item.id,
+            name: item.name,
+            eduCode: item.eduCode,
+            tables: item.tables,
+            description: '',
+            status: 'Chưa xử lý'
+          };
+        }
+      });
+      
+      saveProgress();
+    }
+
+    function saveProgress(itemId) {
+      localStorage.setItem(STORAGE_KEY + '_' + selectedModuleId, JSON.stringify(screensMap));
+      updateProgressMetrics();
+      
+      // Sync single screen item to Firebase Firestore if enabled
+      if (isFirebaseEnabled && firestoreDb) {
+        const docId = `${selectedModuleId}_${itemId}`;
+        const item = screensMap[itemId];
+        firestoreDb.collection('screens').doc(docId).set({
+          id: item.id,
+          moduleId: selectedModuleId,
+          name: item.name,
+          eduCode: item.eduCode || '-',
+          tables: item.tables || [],
+          status: item.status || 'Chưa xử lý',
+          description: item.description || '',
+          jiraUrl: item.jiraUrl || '',
+          actualUrl: item.actualUrl || '',
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true })
+        .then(() => {
+          console.log(`Cloud sync successful for screen ${itemId}`);
+        })
+        .catch(err => {
+          console.error("Firestore update failed:", err);
+        });
+      }
+    }
+
+    // UPDATE METRICS
+    function updateProgressMetrics() {
+      const screensList = Object.values(screensMap);
+      const total = screensList.length;
+      let todo = 0, progress = 0, done = 0;
+      
+      screensList.forEach(s => {
+        if (s.status === 'Chưa xử lý') todo++;
+        else if (s.status === 'Đang xử lý') progress++;
+        else if (s.status === 'Đã xử lý') done++;
+      });
+      
+      const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+      
+      document.getElementById('global-progress-pct').innerText = pct + '%';
+      document.getElementById('global-progress-bar').style.width = pct + '%';
+      
+      document.getElementById('stat-total').innerText = total;
+      document.getElementById('stat-progress').innerText = progress;
+      document.getElementById('stat-done').innerText = done;
+      
+      document.getElementById('chip-all-count').innerText = total;
+      document.getElementById('chip-todo-count').innerText = todo;
+      document.getElementById('chip-progress-count').innerText = progress;
+      document.getElementById('chip-done-count').innerText = done;
+    }
+
+    // MATCH SEARCH AND FILTERS
+    function isMatched(item) {
+      if (!item) return false;
+      if (activeFilter !== 'ALL' && item.status !== activeFilter) {
+        return false;
+      }
+      
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase().trim();
+        const idMatch = item.id.toLowerCase().includes(q);
+        const nameMatch = item.name.toLowerCase().includes(q);
+        const eduMatch = item.eduCode.toLowerCase().includes(q);
+        const tableMatch = item.tables.some(t => t.toLowerCase().includes(q));
+        const descMatch = (item.description || '').toLowerCase().includes(q);
+        
+        return idMatch || nameMatch || eduMatch || tableMatch || descMatch;
+      }
+      
+      return true;
+    }
+
+    // DRAW TABLE TAGS
+    function getTableTagsHtml(tables) {
+      if (!tables || tables.length === 0) return '<span style="color: var(--text-muted); font-size:11px;">Không có bảng liên quan</span>';
+      return tables.map(t => `
+        <a href="db_diagram.html#${t}" target="_blank" class="table-tag-link" title="Xem sơ đồ bảng ${t}">
+          ${t}
+          <svg style="width: 10px; height: 10px; fill: currentColor;" viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+        </a>
+      `).join('');
+    }
+
+    // GENERATE STATUS DROPDOWN HTML
+    function getStatusDropdownHtml(itemId, status) {
+      const cls = status === 'Đã xử lý' ? 'done' : (status === 'Đang xử lý' ? 'progress' : 'todo');
+      return `
+        <select class="status-dropdown ${cls}" onchange="changeItemStatus('${itemId}', this.value)">
+          <option value="Chưa xử lý" ${status === 'Chưa xử lý' ? 'selected' : ''}>Chưa xử lý</option>
+          <option value="Đang xử lý" ${status === 'Đang xử lý' ? 'selected' : ''}>Đang xử lý</option>
+          <option value="Đã xử lý" ${status === 'Đã xử lý' ? 'selected' : ''}>Đã xử lý</option>
+        </select>
+      `;
+    }
+
+    // HANDLE STATUS CHANGE
+    window.changeItemStatus = function(itemId, newStatus) {
+      if (screensMap[itemId]) {
+        screensMap[itemId].status = newStatus;
+        saveProgress(itemId);
+        renderContent();
+      }
+    };
+
+    // BUSINESS LINKS BADGES
+    function getBusinessLinksHtml(screen) {
+      let html = '';
+      if (screen.jiraUrl) {
+        html += `
+          <a href="${screen.jiraUrl}" target="_blank" class="table-tag-link" style="color: #3b82f6; border-color: rgba(59,130,246,0.2); background: rgba(59,130,246,0.05); font-size:10px; padding:2px 6px;" title="Mở Jira User Story">
+            Jira US ↗
+          </a>
+        `;
+      }
+      if (screen.actualUrl) {
+        html += `
+          <a href="${screen.actualUrl}" target="_blank" class="table-tag-link" style="color: #10b981; border-color: rgba(16,185,129,0.2); background: rgba(16,185,129,0.05); font-size:10px; padding:2px 6px;" title="Mở Màn hình Web thực tế">
+            Web UI ↗
+          </a>
+        `;
+      }
+      return html;
+    }
+
+    // HANDLE DESCRIPTION EDIT
+    window.updateItemDescription = function(itemId, value) {
+      if (screensMap[itemId]) {
+        screensMap[itemId].description = value;
+        saveProgress(itemId);
+        showSaveIndicator(itemId);
+      }
+    };
+
+    // HANDLE JIRA URL EDIT
+    window.updateItemJira = function(itemId, value) {
+      if (screensMap[itemId]) {
+        screensMap[itemId].jiraUrl = value;
+        saveProgress(itemId);
+        showSaveIndicator(itemId);
+        renderContent();
+      }
+    };
+
+    // HANDLE ACTUAL WEB URL EDIT
+    window.updateItemActualUrl = function(itemId, value) {
+      if (screensMap[itemId]) {
+        screensMap[itemId].actualUrl = value;
+        saveProgress(itemId);
+        showSaveIndicator(itemId);
+        renderContent();
+      }
+    };
+
+    function showSaveIndicator(itemId) {
+      const indicator = document.getElementById(`save-indicator-${itemId}`);
+      if (indicator) {
+        indicator.classList.add('visible');
+        setTimeout(() => {
+          indicator.classList.remove('visible');
+        }, 1500);
+      }
+    }
+
+    // TOGGLE TREE COLLAPSE
+    window.toggleNode = function(nodeKey) {
+      collapsedNodes[nodeKey] = !collapsedNodes[nodeKey];
+      const body = document.getElementById(`node-body-${nodeKey}`);
+      const header = document.getElementById(`node-header-${nodeKey}`);
+      if (body) {
+        if (collapsedNodes[nodeKey]) {
+          body.classList.add('hidden');
+          header.classList.remove('expanded');
+        } else {
+          body.classList.remove('hidden');
+          header.classList.add('expanded');
+        }
+      }
+    };
+
+    // RENDER TREE VIEW
+    function renderTreeView() {
+      const container = document.createElement('div');
+      container.className = 'tree-container';
+      
+      let matchedCount = 0;
+      
+      activeMenuStructure.forEach((module, mIdx) => {
+        const mKey = `module-${mIdx}`;
+        const isModuleCollapsed = collapsedNodes[mKey] || false;
+        
+        let moduleScreensCount = 0;
+        let moduleDoneCount = 0;
+        
+        const moduleItemsHtml = module.items.map((groupOrDash, gIdx) => {
+          if (groupOrDash.type === 'dashboard') {
+            const screen = screensMap[groupOrDash.id] || { id: groupOrDash.id, name: groupOrDash.name, eduCode: '-', tables: [], description: '', status: 'Chưa xử lý' };
+            const visible = isMatched(screen);
+            if (visible) {
+              matchedCount++;
+              moduleScreensCount++;
+              if (screen.status === 'Đã xử lý') moduleDoneCount++;
+            }
+            
+            return `
+              <div class="screen-item ${visible ? '' : 'hidden'}">
+                <div class="screen-main-row" onclick="toggleNodeDetails('${screen.id}')">
+                  <div class="screen-info-block">
+                    <svg class="chevron-icon" id="chev-${screen.id}" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+                    <span class="screen-id-badge" style="background:var(--accent-light); color:var(--accent-color); border-color:transparent;">DASHBOARD</span>
+                    <span class="screen-title-text" style="font-weight: 600;">${screen.name}</span>
+                  </div>
+                  <div class="screen-controls" onclick="event.stopPropagation()">
+                    ${getStatusDropdownHtml(screen.id, screen.status)}
+                  </div>
+                </div>
+                <div class="screen-detail-panel hidden" id="detail-${screen.id}">
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px;">
+                    <div class="details-row">
+                      <div class="details-label">Link User Story (Jira)</div>
+                      <input type="text" placeholder="Dán link Jira US..." value="${screen.jiraUrl || ''}" onblur="updateItemJira('${screen.id}', this.value)" style="width:100%; padding:6px 10px; border-radius:6px; border:1px solid var(--card-border); background:var(--card-bg); color:var(--text-main); font-size:12px; outline:none;">
+                    </div>
+                    <div class="details-row">
+                      <div class="details-label">Link Màn hình Web thực tế</div>
+                      <input type="text" placeholder="Dán link web chạy thực tế..." value="${screen.actualUrl || ''}" onblur="updateItemActualUrl('${screen.id}', this.value)" style="width:100%; padding:6px 10px; border-radius:6px; border:1px solid var(--card-border); background:var(--card-bg); color:var(--text-main); font-size:12px; outline:none;">
+                    </div>
+                  </div>
+                  <div class="details-row">
+                    <div class="details-label">Bảng Database liên quan</div>
+                    <div class="table-tags">${getTableTagsHtml(screen.tables)}</div>
+                  </div>
+                  <div class="details-row" style="margin-top: 8px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                      <div class="details-label">Ghi chú / Mô tả màn hình</div>
+                      <span class="auto-save-indicator" id="save-indicator-${screen.id}">
+                        <svg class="icon-svg" viewBox="0 0 24 24" style="width:12px;height:12px;fill:#10b981;"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+                        Đã lưu
+                      </span>
+                    </div>
+                    <textarea class="desc-textarea" placeholder="Gõ ghi chú, mô tả cho màn hình dashboard này..." onblur="updateItemDescription('${screen.id}', this.value)">${screen.description || ''}</textarea>
+                  </div>
+                </div>
+              </div>
+            `;
+          }
+          
+          const gKey = `group-${mIdx}-${gIdx}`;
+          const isGroupCollapsed = collapsedNodes[gKey] || false;
+          
+          let groupMatchedCount = 0;
+          let groupDoneCount = 0;
+          
+          const screenItemsHtml = groupOrDash.items.map(item => {
+            const screen = screensMap[item.id] || { id: item.id, name: item.name, eduCode: '-', tables: [], description: '', status: 'Chưa xử lý' };
+            const visible = isMatched(screen);
+            
+            if (visible) {
+              matchedCount++;
+              groupMatchedCount++;
+              moduleScreensCount++;
+              if (screen.status === 'Đã xử lý') {
+                groupDoneCount++;
+                moduleDoneCount++;
+              }
+            }
+            
+            return `
+              <div class="screen-item ${visible ? '' : 'hidden'}">
+                <div class="screen-main-row" onclick="toggleNodeDetails('${screen.id}')">
+                  <div class="screen-info-block">
+                    <svg class="chevron-icon" id="chev-${screen.id}" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+                    <span class="screen-id-badge">${screen.id}</span>
+                    <span class="screen-title-text">${screen.name}</span>
+                    ${screen.eduCode && screen.eduCode !== '-' ? `<span class="screen-edu-code">${screen.eduCode}</span>` : ''}
+                    <div style="display:inline-flex; gap:6px; margin-left:8px;" onclick="event.stopPropagation()">
+                      ${getBusinessLinksHtml(screen)}
+                    </div>
+                  </div>
+                  <div class="screen-controls" onclick="event.stopPropagation()">
+                    ${getStatusDropdownHtml(screen.id, screen.status)}
+                  </div>
+                </div>
+                
+                <div class="screen-detail-panel hidden" id="detail-${screen.id}">
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px;">
+                    <div class="details-row">
+                      <div class="details-label">Link User Story (Jira)</div>
+                      <input type="text" placeholder="Dán link Jira US..." value="${screen.jiraUrl || ''}" onblur="updateItemJira('${screen.id}', this.value)" style="width:100%; padding:6px 10px; border-radius:6px; border:1px solid var(--card-border); background:var(--card-bg); color:var(--text-main); font-size:12px; outline:none;">
+                    </div>
+                    <div class="details-row">
+                      <div class="details-label">Link Màn hình Web thực tế</div>
+                      <input type="text" placeholder="Dán link web chạy thực tế..." value="${screen.actualUrl || ''}" onblur="updateItemActualUrl('${screen.id}', this.value)" style="width:100%; padding:6px 10px; border-radius:6px; border:1px solid var(--card-border); background:var(--card-bg); color:var(--text-main); font-size:12px; outline:none;">
+                    </div>
+                  </div>
+                  <div class="details-row">
+                    <div class="details-label">Bảng Database liên quan</div>
+                    <div class="table-tags">${getTableTagsHtml(screen.tables)}</div>
+                  </div>
+                  <div class="details-row" style="margin-top: 8px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                      <div class="details-label">Ghi chú / Mô tả màn hình</div>
+                      <span class="auto-save-indicator" id="save-indicator-${screen.id}">
+                        <svg class="icon-svg" viewBox="0 0 24 24" style="width:12px;height:12px;fill:#10b981;"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+                        Đã lưu
+                      </span>
+                    </div>
+                    <textarea class="desc-textarea" placeholder="Nhập ghi chú, mô tả logic, phân tích nghiệp vụ cho màn hình này..." onblur="updateItemDescription('${screen.id}', this.value)">${screen.description || ''}</textarea>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+          
+          const isGroupVisible = groupMatchedCount > 0;
+          
+          return `
+            <div class="group-node ${isGroupVisible ? '' : 'hidden'}" id="group-node-${gKey}">
+              <div class="group-header ${isGroupCollapsed ? '' : 'expanded'}" id="node-header-${gKey}" onclick="toggleNode('${gKey}')">
+                <span class="group-title">
+                  <svg class="chevron-icon" viewBox="0 0 24 24" style="transform: ${isGroupCollapsed ? 'rotate(0deg)' : 'rotate(90deg)'}"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+                  ${groupOrDash.title}
+                </span>
+                <span class="module-progress-pill" style="background: rgba(0,0,0,0.03); color: var(--text-muted)">
+                  ${groupDoneCount}/${groupMatchedCount} Đã xong
+                </span>
+              </div>
+              <div class="group-body ${isGroupCollapsed ? 'hidden' : ''}" id="node-body-${gKey}">
+                ${screenItemsHtml}
+              </div>
+            </div>
+          `;
+        }).join('');
+        
+        const isModuleVisible = moduleScreensCount > 0;
+        
+        const moduleHtml = `
+          <div class="module-node ${isModuleVisible ? '' : 'hidden'}" id="module-node-${mKey}">
+            <div class="module-header ${isModuleCollapsed ? '' : 'expanded'}" id="node-header-${mKey}" onclick="toggleNode('${mKey}')">
+              <div class="module-header-left">
+                <svg class="chevron-icon" viewBox="0 0 24 24" style="transform: ${isModuleCollapsed ? 'rotate(0deg)' : 'rotate(90deg)'}"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+                <span class="module-title">${module.title}</span>
+              </div>
+              <span class="module-progress-pill">
+                ${moduleDoneCount}/${moduleScreensCount} Hoàn thành
+              </span>
+            </div>
+            <div class="module-body ${isModuleCollapsed ? 'hidden' : ''}" id="node-body-${mKey}">
+              ${moduleItemsHtml}
+            </div>
+          </div>
+        `;
+        
+        container.innerHTML += moduleHtml;
+      });
+      
+      if (matchedCount === 0) {
+        return `<div style="text-align:center; padding: 48px; color: var(--text-muted);">Không tìm thấy màn hình nào phù hợp với bộ lọc/tìm kiếm.</div>`;
+      }
+      
+      return container.outerHTML;
+    }
+
+    // EXPAND/COLLAPSE ITEM DETAILS IN TREE
+    window.toggleNodeDetails = function(screenId) {
+      const panel = document.getElementById(`detail-${screenId}`);
+      const chev = document.getElementById(`chev-${screenId}`);
+      if (panel) {
+        const isHidden = panel.classList.contains('hidden');
+        if (isHidden) {
+          panel.classList.remove('hidden');
+          if (chev) chev.classList.add('rotated-180');
+        } else {
+          panel.classList.add('hidden');
+          if (chev) chev.classList.remove('rotated-180');
+        }
+      }
+    };
+
+    // RENDER CARD VIEW MODE
+    function renderCardView() {
+      const container = document.createElement('div');
+      container.className = 'card-grid-container';
+      
+      let totalMatched = 0;
+      
+      activeMenuStructure.forEach((module, mIdx) => {
+        let moduleMatched = 0;
+        const groupCardsHtml = module.items.map((groupOrDash) => {
+          
+          let cardsHtml = '';
+          
+          if (groupOrDash.type === 'dashboard') {
+            const screen = screensMap[groupOrDash.id] || { id: groupOrDash.id, name: groupOrDash.name, eduCode: '-', tables: [], description: '', status: 'Chưa xử lý', jiraUrl: '', actualUrl: '' };
+            if (isMatched(screen)) {
+              totalMatched++;
+              moduleMatched++;
+              cardsHtml += `
+                <div class="screen-card">
+                  <div class="card-header">
+                    <span class="screen-id-badge" style="background:var(--accent-light); color:var(--accent-color); border-color:transparent;">DASHBOARD</span>
+                    ${getStatusDropdownHtml(screen.id, screen.status)}
+                  </div>
+                  <div class="card-title" style="font-weight: 700;">${screen.name}</div>
+                  
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
+                    <div class="details-row">
+                      <div class="details-label">Jira Link</div>
+                      <input type="text" placeholder="Jira URL..." value="${screen.jiraUrl || ''}" onblur="updateItemJira('${screen.id}', this.value)" style="width:100%; padding:4px 8px; border-radius:4px; border:1px solid var(--card-border); background:var(--sidebar-bg); color:var(--text-main); font-size:11px; outline:none;">
+                    </div>
+                    <div class="details-row">
+                      <div class="details-label">Web URL</div>
+                      <input type="text" placeholder="Actual URL..." value="${screen.actualUrl || ''}" onblur="updateItemActualUrl('${screen.id}', this.value)" style="width:100%; padding:4px 8px; border-radius:4px; border:1px solid var(--card-border); background:var(--sidebar-bg); color:var(--text-main); font-size:11px; outline:none;">
+                    </div>
+                  </div>
+
+                  <div class="details-row">
+                    <div class="details-label">Bảng DB liên quan</div>
+                    <div class="table-tags">${getTableTagsHtml(screen.tables)}</div>
+                  </div>
+                  <div class="details-row">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                      <span class="details-label">Mô tả / Ghi chú</span>
+                      <span class="auto-save-indicator" id="save-indicator-${screen.id}">
+                        <svg class="icon-svg" viewBox="0 0 24 24" style="width:12px;height:12px;fill:#10b981;"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+                        Đã lưu
+                      </span>
+                    </div>
+                    <textarea class="desc-textarea" placeholder="Nhập mô tả..." onblur="updateItemDescription('${screen.id}', this.value)">${screen.description || ''}</textarea>
+                  </div>
+                </div>
+              `;
+            }
+          } else {
+            groupOrDash.items.forEach(item => {
+              const screen = screensMap[item.id] || { id: item.id, name: item.name, eduCode: '-', tables: [], description: '', status: 'Chưa xử lý', jiraUrl: '', actualUrl: '' };
+              if (isMatched(screen)) {
+                totalMatched++;
+                moduleMatched++;
+                cardsHtml += `
+                  <div class="screen-card">
+                    <div class="card-header">
+                      <span class="screen-id-badge">${screen.id}</span>
+                      ${getStatusDropdownHtml(screen.id, screen.status)}
+                    </div>
+                    <div class="card-title">${screen.name}</div>
+                    
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                      <div style="display:flex; align-items:center; gap:8px;">
+                        <span class="details-label">Mã EDU:</span>
+                        <span class="screen-edu-code">${screen.eduCode || '-'}</span>
+                      </div>
+                      <div style="display:flex; gap:6px;">
+                        ${getBusinessLinksHtml(screen)}
+                      </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                      <div class="details-row">
+                        <div class="details-label">Jira Link</div>
+                        <input type="text" placeholder="Jira URL..." value="${screen.jiraUrl || ''}" onblur="updateItemJira('${screen.id}', this.value)" style="width:100%; padding:4px 8px; border-radius:4px; border:1px solid var(--card-border); background:var(--sidebar-bg); color:var(--text-main); font-size:11px; outline:none;">
+                      </div>
+                      <div class="details-row">
+                        <div class="details-label">Web URL</div>
+                        <input type="text" placeholder="Actual URL..." value="${screen.actualUrl || ''}" onblur="updateItemActualUrl('${screen.id}', this.value)" style="width:100%; padding:4px 8px; border-radius:4px; border:1px solid var(--card-border); background:var(--sidebar-bg); color:var(--text-main); font-size:11px; outline:none;">
+                      </div>
+                    </div>
+
+                    <div class="details-row">
+                      <span class="details-label">Bảng DB liên quan</span>
+                      <div class="table-tags">${getTableTagsHtml(screen.tables)}</div>
+                    </div>
+                    
+                    <div class="details-row">
+                      <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span class="details-label">Ghi chú tiến trình</span>
+                        <span class="auto-save-indicator" id="save-indicator-${screen.id}">
+                          <svg class="icon-svg" viewBox="0 0 24 24" style="width:12px;height:12px;fill:#10b981;"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+                          Đã lưu
+                        </span>
+                      </div>
+                      <textarea class="desc-textarea" placeholder="Ghi chú logic xử lý..." onblur="updateItemDescription('${screen.id}', this.value)">${screen.description || ''}</textarea>
+                    </div>
+                  </div>
+                `;
+              }
+            });
+          }
+          
+          if (cardsHtml) {
+            return `
+              <div class="card-group-section">
+                <h2>${groupOrDash.title || 'Tổng quan'}</h2>
+                <div class="grid-layout">${cardsHtml}</div>
+              </div>
+            `;
+          }
+          return '';
+        }).join('');
+        
+        if (moduleMatched > 0) {
+          const modSec = `
+            <div class="module-card-section" style="margin-bottom: 30px;">
+              <h1 style="font-family:'Outfit'; font-size:20px; font-weight:700; margin-bottom:16px; color:var(--accent-color)">${module.title}</h1>
+              ${groupCardsHtml}
+            </div>
+          `;
+          container.innerHTML += modSec;
+        }
+      });
+      
+      if (totalMatched === 0) {
+        return `<div style="text-align:center; padding: 48px; color: var(--text-muted);">Không tìm thấy màn hình nào phù hợp với bộ lọc.</div>`;
+      }
+      
+      return container.outerHTML;
+    }
+
+    // MAIN RENDER TRIGGER
+    function renderContent() {
+      const target = document.getElementById('content-renderer');
+      if (viewMode === 'tree') {
+        target.innerHTML = renderTreeView();
+      } else {
+        target.innerHTML = renderCardView();
+      }
+      updateProgressMetrics();
+    }
+
+    // VIEW MODE EVENTS
+    document.getElementById('view-mode-tree').addEventListener('click', () => {
+      viewMode = 'tree';
+      document.getElementById('view-mode-tree').classList.add('active');
+      document.getElementById('view-mode-card').classList.remove('active');
+      document.getElementById('view-title').innerText = "Cây chương trình đào tạo";
+      renderContent();
+    });
+
+    document.getElementById('view-mode-card').addEventListener('click', () => {
+      viewMode = 'card';
+      document.getElementById('view-mode-card').classList.add('active');
+      document.getElementById('view-mode-tree').classList.remove('active');
+      document.getElementById('view-title').innerText = "Danh sách thẻ màn hình";
+      renderContent();
+    });
+
+    // THEME TOGGLE
+    const htmlEl = document.documentElement;
+    const themeBtn = document.getElementById('theme-btn');
+    const darkIcon = themeBtn.querySelector('.dark-icon');
+    const lightIcon = themeBtn.querySelector('.light-icon');
+
+    function toggleTheme() {
+      if (htmlEl.classList.contains('dark')) {
+        htmlEl.classList.remove('dark');
+        darkIcon.style.display = 'block';
+        lightIcon.style.display = 'none';
+        localStorage.setItem('menu_theme', 'light');
+      } else {
+        htmlEl.classList.add('dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = 'block';
+        localStorage.setItem('menu_theme', 'dark');
+      }
+    }
+    
+    themeBtn.addEventListener('click', toggleTheme);
+
+    // Initial theme load
+    const savedTheme = localStorage.getItem('menu_theme');
+    if (savedTheme === 'light') {
+      htmlEl.classList.remove('dark');
+      darkIcon.style.display = 'block';
+      lightIcon.style.display = 'none';
+    } else {
+      htmlEl.classList.add('dark');
+      darkIcon.style.display = 'none';
+      lightIcon.style.display = 'block';
+    }
+
+    // SEARCH EVENT
+    document.getElementById('search-box').addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      renderContent();
+    });
+
+    // FILTER CHIPS EVENTS
+    document.querySelectorAll('.filter-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeFilter = btn.getAttribute('data-status');
+        renderContent();
+      });
+    });
+
+    // EXPORT JSON FUNCTION
+    document.getElementById('export-btn').addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(screensMap, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.href = url;
+      downloadAnchor.download = "chuong_trinh_dao_tao_tien_do.json";
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    // IMPORT JSON FUNCTION
+    const fileInput = document.getElementById('import-file-input');
+    document.getElementById('import-btn').addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const imported = JSON.parse(evt.target.result);
+          if (typeof imported === 'object' && imported !== null) {
+            const keys = Object.keys(imported);
+            if (keys.length > 0 && imported[keys[0]].id) {
+              screensMap = imported;
+              saveProgress();
+              renderContent();
+              alert("Nhập tiến độ thành công!");
+            } else {
+              alert("Định dạng file JSON không hợp lệ.");
+            }
+          }
+        } catch (err) {
+          alert("Lỗi khi đọc file JSON: " + err.message);
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    // RESET BUTTON EVENT
+    document.getElementById('reset-btn').addEventListener('click', () => {
+      if (confirm("Bạn có chắc chắn muốn reset toàn bộ tiến độ xử lý và ghi chú về mặc định không? Hành động này không thể hoàn tác.")) {
+        localStorage.removeItem(STORAGE_KEY);
+        initData();
+        renderContent();
+      }
+    });
+
+    // FIREBASE SYNC & MULTI-MODULE LOGIC
+    let isFirebaseEnabled = false;
+    let firestoreDb = null;
+    let screensListenerUnsubscribe = null;
+    let menuStructureListenerUnsubscribe = null;
+    let tablesListenerUnsubscribe = null;
+
+    // Default static menu structures fallback
+    const DEFAULT_STRUCTURES = {
+      training_program: MENU_STRUCTURE,
+      admission: [
+        {
+          title: "Module 1: Tiếp nhận & Đăng ký",
+          type: "module",
+          items: [
+            { id: "M3_DASHBOARD", name: "Dashboard tuyển sinh chung", type: "dashboard" },
+            {
+              title: "Nhóm 1.1: Đăng ký Hồ sơ",
+              type: "group",
+              items: [
+                { id: "B.7.1.1", name: "Đăng ký tuyển sinh trực tuyến" },
+                { id: "B.7.1.2", name: "Duyệt hồ sơ tuyển sinh" }
+              ]
+            }
+          ]
+        }
+      ]
+    };
+
+    const DEFAULT_SCREENS_MAP = {
+      training_program: {},
+      admission: {
+        "M3_DASHBOARD": { id: "M3_DASHBOARD", name: "Dashboard tuyển sinh chung", eduCode: "-", tables: [], description: "", status: "Chưa xử lý", jiraUrl: "", actualUrl: "" },
+        "B.7.1.1": { id: "B.7.1.1", name: "Đăng ký tuyển sinh trực tuyến", eduCode: "TS011", tables: ["TS_HoSoDangKy", "TS_ThiSinh"], description: "", status: "Chưa xử lý", jiraUrl: "", actualUrl: "" },
+        "B.7.1.2": { id: "B.7.1.2", name: "Duyệt hồ sơ tuyển sinh", eduCode: "TS012", tables: ["TS_HoSoDangKy", "DM_HeDaoTao"], description: "", status: "Chưa xử lý", jiraUrl: "", actualUrl: "" }
+      }
+    };
+
+    // Populate default training program screens map from INITIAL_SCREENS
+    INITIAL_SCREENS.forEach(sc => {
+      DEFAULT_SCREENS_MAP.training_program[sc.id] = {
+        id: sc.id,
+        name: sc.name,
+        eduCode: sc.eduCode,
+        tables: sc.tables,
+        description: '',
+        status: 'Chưa xử lý',
+        jiraUrl: '',
+        actualUrl: ''
+      };
+    });
+    // Add extra items
+    const extraItems = [
+      { id: "M1_DASHBOARD", name: "Dashboard — Tổng quan số lượng môn học, môn chưa phân công GV, đề cương chưa duyệt, môn thay thế...", eduCode: "-", tables: [] },
+      { id: "M2_DASHBOARD", name: "Dashboard", eduCode: "-", tables: [] },
+      { id: "M1_NHOM_MON_DK", name: "Nhóm môn điều kiện", eduCode: "-", tables: [] }
+    ];
+    extraItems.forEach(item => {
+      DEFAULT_SCREENS_MAP.training_program[item.id] = {
+        id: item.id,
+        name: item.name,
+        eduCode: item.eduCode,
+        tables: item.tables,
+        description: '',
+        status: 'Chưa xử lý',
+        jiraUrl: '',
+        actualUrl: ''
+      };
+    });
+
+    let MODULES_LIST = [
+      { id: 'training_program', name: 'Chương trình Đào tạo', order: 1 },
+      { id: 'admission', name: 'Tuyển sinh (Mới)', order: 2 }
+    ];
+
+    let tables = [
+      { id: "DM_HeDaoTao", title: "Bậc đào tạo / Hệ đào tạo", group: "general", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "DM_LoaiHinhDT", title: "Loại hình đào tạo", group: "general", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "DM_ThoiGianDaoTao", title: "Thời gian kế hoạch đào tạo", group: "general", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "DM_KhoiNganh", title: "Khối ngành học", group: "general", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "DM_NamHoc", title: "Năm học niên khóa", group: "general", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "DM_KhoaHoc", title: "Khóa học học viên", group: "general", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "DM_Dot", title: "Đợt / Học kỳ tuyển sinh", group: "general", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "DM_Nganh", title: "Ngành đào tạo chuyên môn", group: "majors", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "DM_ChuyenNganhChiTiet", title: "Chuyên ngành chi tiết (Nghề)", group: "majors", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "DM_QuyDinhKhoaNganh", title: "Quy định Khóa - Ngành học", group: "majors", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "DM_MonHoc", title: "Danh sách môn học chính thức", group: "subjects", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "DM_KhoiKienThuc", title: "Khối kiến thức khung chương trình", group: "subjects", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "DM_TinhChatMonHoc", title: "Tính chất môn học", group: "subjects", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "DM_HinhThucThi", title: "Hình thức thi & Số GV chấm", group: "subjects", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "DM_MonHocHeDaoTao", title: "Môn học cấu hình bậc đào tạo", group: "subjects", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "DM_MonHocRangBuoc", title: "Môn học trước / Tiên quyết / Song hành", group: "subjects", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "DT_MonHocThayTe", title: "Bảng cấu hình môn học thay thế", group: "subjects", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "DT_MonHocModule", title: "Bảng môn học dạng module tích hợp", group: "subjects", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "DT_ChiTietMonHocModule", title: "Chi tiết các môn thành phần", group: "subjects", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "DT_ChuongTrinhKhung", title: "Chương trình khung khóa - ngành", group: "curriculum", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "DT_KhungHocKy", title: "Khung học kỳ thuộc CTK", group: "curriculum", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "DT_ChiTietKhungHocKy", title: "Môn học chi tiết thuộc Học kỳ CTK", group: "curriculum", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "DT_CTK_NhomTuChon", title: "Nhóm môn học tự chọn của CTK", group: "curriculum", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "DT_CTK_ChiTietNhomTuChon", title: "Chi tiết các môn thuộc nhóm tự chọn", group: "curriculum", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "KT_NC_KeHoachDaoTao", title: "Kế hoạch đào tạo chi tiết", group: "curriculum", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "DM_LopHoc", title: "Danh mục lớp học chính thức", group: "classes", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "DT_PhanMonLopHoc", title: "Phân môn lớp học kế hoạch", group: "classes", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "DT_ChiTietPhanMonLopHoc", title: "Bảng phân môn chi tiết cho Lớp học", group: "classes", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "DM_GiangVien", title: "Danh sách giảng viên", group: "schedule", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "TKB_MonHocGiangVien", title: "Phân công giảng viên dạy môn", group: "schedule", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "TKB_LopHocPhan", title: "Bảng thông tin Lớp học phần", group: "schedule", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] },
+      { id: "TKB_LichHoc", title: "Lịch học chi tiết", group: "schedule", columns: [{ name: "Id", type: "int", key: "PK" }], relations: [] }
+    ];
+
+    let activeMenuStructure = DEFAULT_STRUCTURES.training_program;
+    let selectedModuleId = localStorage.getItem('selected_module_id') || 'training_program';
+
+    // RENDER TOP-LEVEL INTERACTION HELPERS
+    window.switchModule = function(moduleId) {
+      selectedModuleId = moduleId;
+      localStorage.setItem('selected_module_id', moduleId);
+      
+      const select = document.getElementById('module-select');
+      if (select && select.value !== moduleId) {
+        select.value = moduleId;
+      }
+      
+      if (DEFAULT_STRUCTURES[moduleId]) {
+        activeMenuStructure = DEFAULT_STRUCTURES[moduleId];
+      }
+      
+      initDataForModule(moduleId);
+    };
+
+    function initDataForModule(moduleId) {
+      if (screensListenerUnsubscribe) {
+        screensListenerUnsubscribe();
+        screensListenerUnsubscribe = null;
+      }
+
+      // Load screens map
+      const savedKey = STORAGE_KEY + '_' + moduleId;
+      const saved = localStorage.getItem(savedKey);
+      if (saved) {
+        try {
+          screensMap = JSON.parse(saved);
+        } catch (e) {
+          console.error("Localstorage load error:", e);
+          screensMap = JSON.parse(JSON.stringify(DEFAULT_SCREENS_MAP[moduleId] || {}));
+        }
+      } else {
+        screensMap = JSON.parse(JSON.stringify(DEFAULT_SCREENS_MAP[moduleId] || {}));
+      }
+
+      // Load menu structure
+      const savedStructKey = STORAGE_KEY + '_structure_' + moduleId;
+      const savedStruct = localStorage.getItem(savedStructKey);
+      if (savedStruct) {
+        try {
+          activeMenuStructure = JSON.parse(savedStruct);
+        } catch (e) {
+          activeMenuStructure = DEFAULT_STRUCTURES[moduleId] || [];
+        }
+      } else {
+        activeMenuStructure = DEFAULT_STRUCTURES[moduleId] || [];
+      }
+
+      updateProgressMetrics();
+      renderContent();
+
+      if (isFirebaseEnabled && firestoreDb) {
+        setupFirebaseListener(moduleId);
+        setupMenuStructureListener(moduleId);
+      }
+    }
+
+    function initData() {
+      // Stubbed out in favor of initDataForModule
+    }
+
+    function updateCloudStatus(status) {
+      const badge = document.getElementById('cloud-status-badge');
+      if (!badge) return;
+      
+      badge.className = `cloud-status-badge ${status}`;
+      const dot = badge.querySelector('.status-dot');
+      const text = badge.querySelector('.status-text');
+      
+      if (status === 'connected') {
+        text.innerText = 'Cloud Syncing';
+        badge.title = 'Đã kết nối Firebase Firestore. Tiến độ đồng bộ tự động.';
+      } else if (status === 'connecting') {
+        text.innerText = 'Connecting...';
+        badge.title = 'Đang tải Firebase SDK và kết nối database...';
+      } else if (status === 'error') {
+        text.innerText = 'Cloud Error';
+        badge.title = 'Lỗi kết nối Firebase database.';
+      } else {
+        text.innerText = 'Local Sync';
+        badge.title = 'Chạy ở chế độ ngoại tuyến. Tiến độ lưu ở trình duyệt này.';
+      }
+    }
+
+    function showToast(message, type = 'info') {
+      let container = document.getElementById('toast-container');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+      }
+      
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `
+        <svg class="icon-svg" style="width:14px;height:14px;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+        <span>${message}</span>
+      `;
+      
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(12px) scale(0.95)';
+        setTimeout(() => {
+          toast.remove();
+        }, 300);
+      }, 4000);
+    }
+
+    function fetchFirebaseConfig() {
+      updateCloudStatus('connecting');
+      if (typeof FIREBASE_CONFIG !== 'undefined' && FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey) {
+        if (FIREBASE_CONFIG.apiKey !== 'YOUR_API_KEY') {
+          initFirebase(FIREBASE_CONFIG);
+        } else {
+          console.log("Firebase config is placeholder, running in Offline mode.");
+          updateCloudStatus('offline');
+          switchModule(selectedModuleId);
+        }
+      } else {
+        console.log("firebase_config.js not loaded or FIREBASE_CONFIG is undefined, running in Offline mode.");
+        updateCloudStatus('offline');
+        switchModule(selectedModuleId);
+      }
+    }
+
+    function loadScript(src) {
+      return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    }
+
+    async function initFirebase(config) {
+      try {
+        await loadScript('https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js');
+        await loadScript('https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js');
+        
+        firebase.initializeApp(config);
+        firestoreDb = firebase.firestore();
+        isFirebaseEnabled = true;
+        
+        updateCloudStatus('connected');
+        showToast('Đồng bộ Cloud Sync đã sẵn sàng!');
+        
+        // Dynamically load modules & tables from Firestore first
+        await loadModulesListFromFirestore();
+        setupTablesListener();
+        
+        switchModule(selectedModuleId);
+        checkAndInitializeFirestoreData();
+        initializeDefaultTablesInFirestore();
+      } catch (err) {
+        console.error("Firebase init failed:", err);
+        updateCloudStatus('error');
+        showToast('Lỗi tải SDK. Chuyển sang lưu cục bộ.', 'error');
+        switchModule(selectedModuleId);
+      }
+    }
+
+    async function loadModulesListFromFirestore() {
+      if (!firestoreDb) return;
+      try {
+        const snap = await firestoreDb.collection('modules').orderBy('order').get();
+        if (!snap.empty) {
+          const list = [];
+          snap.forEach(doc => {
+            list.push(doc.data());
+          });
+          MODULES_LIST = list;
+          repopulateModuleDropdown();
+        }
+      } catch (err) {
+        console.error("Error loading modules list from Firestore:", err);
+      }
+    }
+
+    async function initializeDefaultTablesInFirestore() {
+      if (!firestoreDb) return;
+      try {
+        const snap = await firestoreDb.collection('tables').limit(1).get();
+        if (snap.empty) {
+          console.log("Firestore tables collection is empty. Populating 32 default tables...");
+          const batch = firestoreDb.batch();
+          
+          const defaultTablesList = [
+            { id: "DM_HeDaoTao", title: "Bậc đào tạo / Hệ đào tạo", group: "general" },
+            { id: "DM_LoaiHinhDT", title: "Loại hình đào tạo", group: "general" },
+            { id: "DM_ThoiGianDaoTao", title: "Thời gian kế hoạch đào tạo", group: "general" },
+            { id: "DM_KhoiNganh", title: "Khối ngành học", group: "general" },
+            { id: "DM_NamHoc", title: "Năm học niên khóa", group: "general" },
+            { id: "DM_KhoaHoc", title: "Khóa học học viên", group: "general" },
+            { id: "DM_Dot", title: "Đợt / Học kỳ tuyển sinh", group: "general" },
+            { id: "DM_Nganh", title: "Ngành đào tạo chuyên môn", group: "majors" },
+            { id: "DM_ChuyenNganhChiTiet", title: "Chuyên ngành chi tiết (Nghề)", group: "majors" },
+            { id: "DM_QuyDinhKhoaNganh", title: "Quy định Khóa - Ngành học", group: "majors" },
+            { id: "DM_MonHoc", title: "Danh sách môn học chính thức", group: "subjects" },
+            { id: "DM_KhoiKienThuc", title: "Khối kiến thức khung chương trình", group: "subjects" },
+            { id: "DM_TinhChatMonHoc", title: "Tính chất môn học", group: "subjects" },
+            { id: "DM_HinhThucThi", title: "Hình thức thi & Số GV chấm", group: "subjects" },
+            { id: "DM_MonHocHeDaoTao", title: "Môn học cấu hình bậc đào tạo", group: "subjects" },
+            { id: "DM_MonHocRangBuoc", title: "Môn học trước / Tiên quyết / Song hành", group: "subjects" },
+            { id: "DT_MonHocThayTe", title: "Bảng cấu hình môn học thay thế", group: "subjects" },
+            { id: "DT_MonHocModule", title: "Bảng môn học dạng module tích hợp", group: "subjects" },
+            { id: "DT_ChiTietMonHocModule", title: "Chi tiết các môn thành phần", group: "subjects" },
+            { id: "DT_ChuongTrinhKhung", title: "Chương trình khung khóa - ngành", group: "curriculum" },
+            { id: "DT_KhungHocKy", title: "Khung học kỳ thuộc CTK", group: "curriculum" },
+            { id: "DT_ChiTietKhungHocKy", title: "Môn học chi tiết thuộc Học kỳ CTK", group: "curriculum" },
+            { id: "DT_CTK_NhomTuChon", title: "Nhóm môn học tự chọn của CTK", group: "curriculum" },
+            { id: "DT_CTK_ChiTietNhomTuChon", title: "Chi tiết các môn thuộc nhóm tự chọn", group: "curriculum" },
+            { id: "KT_NC_KeHoachDaoTao", title: "Kế hoạch đào tạo chi tiết", group: "curriculum" },
+            { id: "DM_LopHoc", title: "Danh mục lớp học chính thức", group: "classes" },
+            { id: "DT_PhanMonLopHoc", title: "Phân môn lớp học kế hoạch", group: "classes" },
+            { id: "DT_ChiTietPhanMonLopHoc", title: "Bảng phân môn chi tiết cho Lớp học", group: "classes" },
+            { id: "DM_GiangVien", title: "Danh sách giảng viên", group: "schedule" },
+            { id: "TKB_MonHocGiangVien", title: "Phân công giảng viên dạy môn", group: "schedule" },
+            { id: "TKB_LopHocPhan", title: "Bảng thông tin Lớp học phần", group: "schedule" },
+            { id: "TKB_LichHoc", title: "Lịch học chi tiết", group: "schedule" }
+          ];
+
+          defaultTablesList.forEach(t => {
+            batch.set(firestoreDb.collection('tables').doc(t.id), {
+              tableId: t.id,
+              tableName: t.title,
+              group: t.group,
+              x: Math.floor(Math.random() * 800) + 100,
+              y: Math.floor(Math.random() * 500) + 100,
+              columns: [{ name: "Id", type: "int", key: "PK" }],
+              relations: []
+            });
+          });
+
+          await batch.commit();
+          console.log("Successfully initialized default tables in Firestore.");
+        }
+      } catch (err) {
+        console.error("Error creating default tables:", err);
+      }
+    }
+
+    async function checkAndInitializeFirestoreData() {
+      if (!firestoreDb) return;
+      try {
+        const docRef = firestoreDb.collection('modules').doc('training_program');
+        const doc = await docRef.get();
+        if (!doc.exists) {
+          console.log("Initializing database with default training_program & admission modules...");
+          const batch = firestoreDb.batch();
+          
+          batch.set(firestoreDb.collection('modules').doc('training_program'), { id: 'training_program', name: 'Chương trình Đào tạo', order: 1 });
+          batch.set(firestoreDb.collection('modules').doc('admission'), { id: 'admission', name: 'Tuyển sinh (Mới)', order: 2 });
+          
+          // Seed static menu structures
+          batch.set(firestoreDb.collection('menu_structures').doc('training_program'), {
+            moduleId: 'training_program',
+            structure: DEFAULT_STRUCTURES.training_program
+          });
+          batch.set(firestoreDb.collection('menu_structures').doc('admission'), {
+            moduleId: 'admission',
+            structure: DEFAULT_STRUCTURES.admission
+          });
+
+          Object.keys(DEFAULT_SCREENS_MAP).forEach(modId => {
+            const screensOfMod = DEFAULT_SCREENS_MAP[modId];
+            Object.keys(screensOfMod).forEach(scrId => {
+              const scr = screensOfMod[scrId];
+              const docId = `${modId}_${scrId}`;
+              batch.set(firestoreDb.collection('screens').doc(docId), {
+                id: scr.id,
+                moduleId: modId,
+                name: scr.name,
+                eduCode: scr.eduCode || '-',
+                tables: scr.tables || [],
+                status: 'Chưa xử lý',
+                description: '',
+                jiraUrl: '',
+                actualUrl: '',
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+              });
+            });
+          });
+          
+          await batch.commit();
+          console.log("Successfully initialized default modules and screens in Cloud Firestore!");
+        }
+      } catch (err) {
+        console.error("Error verifying/initializing Firestore collections:", err);
+      }
+    }
+
+    function setupFirebaseListener(moduleId) {
+      if (!firestoreDb) return;
+      
+      screensListenerUnsubscribe = firestoreDb.collection('screens')
+        .where('moduleId', '==', moduleId)
+        .onSnapshot(snapshot => {
+          let changed = false;
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            const scrId = data.id;
+            if (screensMap[scrId]) {
+              if (screensMap[scrId].status !== data.status || 
+                  screensMap[scrId].description !== data.description ||
+                  screensMap[scrId].jiraUrl !== data.jiraUrl ||
+                  screensMap[scrId].actualUrl !== data.actualUrl) {
+                
+                screensMap[scrId].status = data.status || 'Chưa xử lý';
+                screensMap[scrId].description = data.description || '';
+                screensMap[scrId].jiraUrl = data.jiraUrl || '';
+                screensMap[scrId].actualUrl = data.actualUrl || '';
+                changed = true;
+              }
+            } else {
+              screensMap[scrId] = {
+                id: data.id,
+                name: data.name,
+                eduCode: data.eduCode || '-',
+                tables: data.tables || [],
+                status: data.status || 'Chưa xử lý',
+                description: data.description || '',
+                jiraUrl: data.jiraUrl || '',
+                actualUrl: data.actualUrl || ''
+              };
+              changed = true;
+            }
+          });
+          
+          if (changed) {
+            localStorage.setItem(STORAGE_KEY + '_' + moduleId, JSON.stringify(screensMap));
+            updateProgressMetrics();
+            renderContent();
+          }
+        }, err => {
+          console.error("Firestore screens list listen error:", err);
+          showToast('Lỗi đồng bộ Firestore', 'error');
+        });
+    }
+
+    function setupMenuStructureListener(moduleId) {
+      if (menuStructureListenerUnsubscribe) {
+        menuStructureListenerUnsubscribe();
+        menuStructureListenerUnsubscribe = null;
+      }
+      if (!firestoreDb) return;
+      
+      menuStructureListenerUnsubscribe = firestoreDb.collection('menu_structures').doc(moduleId)
+        .onSnapshot(doc => {
+          if (doc.exists) {
+            const data = doc.data();
+            activeMenuStructure = data.structure || [];
+            localStorage.setItem(STORAGE_KEY + '_structure_' + moduleId, JSON.stringify(activeMenuStructure));
+            updateProgressMetrics();
+            renderContent();
+          }
+        });
+    }
+
+    function setupTablesListener() {
+      if (tablesListenerUnsubscribe) {
+        tablesListenerUnsubscribe();
+        tablesListenerUnsubscribe = null;
+      }
+      if (!firestoreDb) return;
+      
+      tablesListenerUnsubscribe = firestoreDb.collection('tables')
+        .onSnapshot(snapshot => {
+          const list = [];
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            list.push({
+              id: data.tableId,
+              title: data.tableName || data.tableId,
+              group: data.group || 'general',
+              x: data.x !== undefined ? data.x : 150,
+              y: data.y !== undefined ? data.y : 150,
+              columns: data.columns || [],
+              relations: data.relations || []
+            });
+          });
+          if (list.length > 0) {
+            tables = list;
+            localStorage.setItem(STORAGE_KEY + '_tables_schema', JSON.stringify(tables));
+            renderContent();
+          }
+        });
+    }
+
+    // ADMIN SYSTEM SETTINGS LOGIC
+    let activeAdminTab = 'modules';
+
+    window.openAdminSettings = function() {
+      document.getElementById('admin-modal').classList.add('active');
+      switchAdminTab(activeAdminTab);
+    };
+
+    window.closeAdminSettings = function() {
+      document.getElementById('admin-modal').classList.remove('active');
+    };
+
+    window.switchAdminTab = function(tabId) {
+      activeAdminTab = tabId;
+      document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.getElementById(`tab-btn-${tabId}`).classList.add('active');
+      renderAdminTabContent();
+    };
+
+    function renderAdminTabContent() {
+      const container = document.getElementById('admin-tab-content');
+      if (!container) return;
+      container.innerHTML = "";
+
+      if (activeAdminTab === 'modules') {
+        renderModulesAdmin(container);
+      } else if (activeAdminTab === 'screens') {
+        renderScreensAdmin(container);
+      } else if (activeAdminTab === 'database') {
+        renderDatabaseAdmin(container);
+      }
+    }
+
+    function renderModulesAdmin(container) {
+      let modulesListHtml = MODULES_LIST.map(mod => `
+        <div class="admin-list-card" style="margin-bottom:8px;">
+          <div>
+            <strong style="color:var(--text-main); font-size:14px;">${mod.name}</strong>
+            <div style="font-size:11px; color:var(--text-muted);">ID: ${mod.id}</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="admin-btn secondary" style="padding:4px 8px; font-size:11px;" onclick="renameModulePrompt('${mod.id}', '${mod.name}')">Sửa tên</button>
+            <button class="admin-btn danger" style="padding:4px 8px; font-size:11px;" onclick="deleteModulePrompt('${mod.id}')">Xóa</button>
+          </div>
+        </div>
+      `).join('');
+
+      container.innerHTML = `
+        <div class="admin-panel-title">Quản lý Phân hệ (Modules)</div>
+        <div style="display:grid; grid-template-columns: 1fr; gap:16px;">
+          <div>
+            <h4 style="font-size:12px; font-weight:700; margin-bottom:12px; color:var(--text-muted); text-transform:uppercase;">Danh sách Phân hệ</h4>
+            <div style="max-height: 220px; overflow-y:auto; padding-right:4px;">
+              ${modulesListHtml || '<div style="color:var(--text-muted); font-size:12px;">Chưa có phân hệ nào.</div>'}
+            </div>
+          </div>
+          <div style="border-top: 1px solid var(--card-border); padding-top:16px;">
+            <h4 style="font-size:12px; font-weight:700; margin-bottom:12px; color:var(--text-muted); text-transform:uppercase;">Thêm Phân hệ Mới</h4>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:12px;">
+              <div class="admin-input-group">
+                <label>Mã Phân hệ (ID)</label>
+                <input type="text" id="new-mod-id" class="admin-input" placeholder="Ví dụ: khao_thi (chữ thường, gạch dưới)">
+              </div>
+              <div class="admin-input-group">
+                <label>Tên Phân hệ</label>
+                <input type="text" id="new-mod-name" class="admin-input" placeholder="Ví dụ: Khảo thí & Điểm thi">
+              </div>
+            </div>
+            <button class="admin-btn primary" onclick="addModule()">Thêm phân hệ</button>
+          </div>
+        </div>
+      `;
+    }
+
+    window.addModule = function() {
+      const id = document.getElementById('new-mod-id').value.trim();
+      const name = document.getElementById('new-mod-name').value.trim();
+      
+      if (!id || !name) {
+        alert("Vui lòng điền đầy đủ Mã ID và Tên phân hệ!");
+        return;
+      }
+      if (!/^[a-z0-9_]+$/.test(id)) {
+        alert("Mã phân hệ chỉ chứa chữ thường, số và gạch dưới (không chứa khoảng trắng hay ký tự đặc biệt)!");
+        return;
+      }
+      if (MODULES_LIST.some(m => m.id === id)) {
+        alert("Mã phân hệ này đã tồn tại!");
+        return;
+      }
+
+      const newMod = { id, name, order: MODULES_LIST.length + 1 };
+      MODULES_LIST.push(newMod);
+      
+      DEFAULT_STRUCTURES[id] = [];
+      DEFAULT_SCREENS_MAP[id] = {};
+
+      if (isFirebaseEnabled && firestoreDb) {
+        firestoreDb.collection('modules').doc(id).set(newMod);
+        firestoreDb.collection('menu_structures').doc(id).set({
+          moduleId: id,
+          structure: []
+        });
+      } else {
+        localStorage.setItem(STORAGE_KEY + '_modules_list', JSON.stringify(MODULES_LIST));
+      }
+
+      repopulateModuleDropdown();
+      switchModule(id);
+      renderAdminTabContent();
+      showToast(`Đã thêm phân hệ ${name}`);
+    };
+
+    window.renameModulePrompt = function(moduleId, oldName) {
+      const newName = prompt(`Nhập tên mới cho phân hệ ${oldName}:`, oldName);
+      if (newName && newName.trim() && newName !== oldName) {
+        const mod = MODULES_LIST.find(m => m.id === moduleId);
+        if (mod) {
+          mod.name = newName.trim();
+          if (isFirebaseEnabled && firestoreDb) {
+            firestoreDb.collection('modules').doc(moduleId).update({
+              name: newName.trim()
+            });
+          } else {
+            localStorage.setItem(STORAGE_KEY + '_modules_list', JSON.stringify(MODULES_LIST));
+          }
+          repopulateModuleDropdown();
+          renderAdminTabContent();
+          showToast("Đã đổi tên phân hệ thành công!");
+        }
+      }
+    };
+
+    window.deleteModulePrompt = function(moduleId) {
+      if (MODULES_LIST.length <= 1) {
+        alert("Không thể xóa phân hệ duy nhất còn lại!");
+        return;
+      }
+      
+      // Warning prompt as requested by user
+      if (confirm(`⚠️ CẢNH BÁO QUAN TRỌNG:\nXóa phân hệ này sẽ xóa vĩnh viễn toàn bộ menu cấu trúc và toàn bộ tiến độ xử lý của các màn hình thuộc phân hệ này.\nHành động này không thể hoàn tác!\n\nBạn có thực sự chắc chắn muốn tiếp tục không?`)) {
+        MODULES_LIST = MODULES_LIST.filter(m => m.id !== moduleId);
+        delete DEFAULT_STRUCTURES[moduleId];
+        delete DEFAULT_SCREENS_MAP[moduleId];
+        
+        if (isFirebaseEnabled && firestoreDb) {
+          firestoreDb.collection('modules').doc(moduleId).delete();
+          firestoreDb.collection('menu_structures').doc(moduleId).delete();
+          firestoreDb.collection('screens').where('moduleId', '==', moduleId).get().then(snap => {
+            const batch = firestoreDb.batch();
+            snap.forEach(doc => {
+              batch.delete(doc.ref);
+            });
+            batch.commit();
+          });
+        } else {
+          localStorage.setItem(STORAGE_KEY + '_modules_list', JSON.stringify(MODULES_LIST));
+          localStorage.removeItem(STORAGE_KEY + '_' + moduleId);
+          localStorage.removeItem(STORAGE_KEY + '_structure_' + moduleId);
+        }
+
+        repopulateModuleDropdown();
+        switchModule(MODULES_LIST[0].id);
+        renderAdminTabContent();
+        showToast("Đã xóa phân hệ thành công!");
+      }
+    };
+
+    function repopulateModuleDropdown() {
+      const select = document.getElementById('module-select');
+      if (select) {
+        select.innerHTML = MODULES_LIST.map(mod => `
+          <option value="${mod.id}">${mod.name}</option>
+        `).join('');
+        select.value = selectedModuleId;
+      }
+    }
+
+    // Tab Screens
+    function renderScreensAdmin(container) {
+      const tablesCheckboxHtml = tables.map(t => `
+        <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-main);">
+          <input type="checkbox" name="screen-tables" value="${t.id}">
+          ${t.id}
+        </label>
+      `).join('');
+
+      const allGroupsList = [];
+      activeMenuStructure.forEach((modNode, mIdx) => {
+        modNode.items.forEach((grpOrDash, gIdx) => {
+          if (grpOrDash.type === 'group') {
+            allGroupsList.push({
+              key: `${mIdx}-${gIdx}`,
+              moduleTitle: modNode.title,
+              groupTitle: grpOrDash.title
+            });
+          }
+        });
+      });
+
+      const groupSelectOptions = allGroupsList.map(g => `
+        <option value="${g.key}">[${g.moduleTitle}] ${g.groupTitle}</option>
+      `).join('');
+
+      const screensListHtml = Object.values(screensMap).map(scr => `
+        <div class="admin-list-card" style="margin-bottom:6px; padding:6px 12px;">
+          <div style="font-size:12px;">
+            <strong style="color:var(--text-main);">${scr.id}</strong> - ${scr.name}
+            <div style="font-size:10px; color:var(--text-muted);">EDU: ${scr.eduCode || '-'} | DB: ${scr.tables.join(', ') || 'Không'}</div>
+          </div>
+          <button class="admin-btn danger" style="padding:2px 6px; font-size:10px;" onclick="deleteScreenPrompt('${scr.id}')">Xóa</button>
+        </div>
+      `).join('');
+
+      container.innerHTML = `
+        <div class="admin-panel-title">Quản lý Màn hình (Screens)</div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; height: calc(100% - 40px); overflow:hidden;">
+          <div style="overflow-y:auto; padding-right:12px; display:flex; flex-direction:column; gap:16px; border-right:1px solid var(--card-border);">
+            <div>
+              <h4 style="font-size:11px; font-weight:700; margin-bottom:8px; color:var(--text-muted); text-transform:uppercase;">Thêm Nhóm Menu</h4>
+              <div class="admin-input-group" style="margin-bottom:8px;">
+                <label>Tên Nhóm (Ví dụ: Nhóm 1.6 - Thiết lập thi)</label>
+                <input type="text" id="new-group-title" class="admin-input" placeholder="Tên nhóm mới...">
+              </div>
+              <button class="admin-btn secondary" style="width:100%;" onclick="addNewGroup()">Tạo nhóm mới</button>
+            </div>
+            
+            <div style="border-top:1px solid var(--card-border); padding-top:16px;">
+              <h4 style="font-size:11px; font-weight:700; margin-bottom:8px; color:var(--text-muted); text-transform:uppercase;">Thêm Màn hình vào Nhóm</h4>
+              <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:12px;">
+                <div class="admin-input-group">
+                  <label>Chọn Nhóm</label>
+                  <select id="screen-group-select" class="admin-input">
+                    ${groupSelectOptions || '<option value="">(Không có nhóm menu)</option>'}
+                  </select>
+                </div>
+                <div class="admin-input-group">
+                  <label>Mã Màn hình (ID)</label>
+                  <input type="text" id="new-scr-id" class="admin-input" placeholder="Ví dụ: B.6.3.20">
+                </div>
+                <div class="admin-input-group">
+                  <label>Tên Màn hình</label>
+                  <input type="text" id="new-scr-name" class="admin-input" placeholder="Ví dụ: Thiết lập thi">
+                </div>
+                <div class="admin-input-group">
+                  <label>Mã EDU cũ</label>
+                  <input type="text" id="new-scr-educode" class="admin-input" placeholder="Ví dụ: E041005 (hoặc -)">
+                </div>
+                <div class="admin-input-group">
+                  <label>Bảng DB liên quan</label>
+                  <div style="max-height:90px; overflow-y:auto; border:1px solid var(--card-border); padding:6px; border-radius:6px; background:var(--card-bg); display:flex; flex-direction:column; gap:4px;">
+                    ${tablesCheckboxHtml || '<div style="font-size:11px; color:var(--text-muted);">Không có bảng nào.</div>'}
+                  </div>
+                </div>
+              </div>
+              <button class="admin-btn primary" style="width:100%;" onclick="addNewScreen()">Thêm màn hình</button>
+            </div>
+          </div>
+
+          <div style="overflow-y:auto; padding-right:4px; display:flex; flex-direction:column; gap:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <h4 style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Danh sách màn hình</h4>
+              <span style="font-size:11px; color:var(--text-muted); font-weight:600;">${Object.keys(screensMap).length} Màn hình</span>
+            </div>
+            <div style="max-height:420px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; padding-right:4px;">
+              ${screensListHtml || '<div style="color:var(--text-muted); font-size:12px;">Chưa có màn hình nào.</div>'}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    window.addNewGroup = function() {
+      const title = document.getElementById('new-group-title').value.trim();
+      if (!title) {
+        alert("Vui lòng nhập tên nhóm!");
+        return;
+      }
+
+      if (activeMenuStructure.length === 0) {
+        activeMenuStructure.push({
+          title: "Tổng quan",
+          type: "module",
+          items: []
+        });
+      }
+
+      activeMenuStructure[0].items.push({
+        title: title,
+        type: "group",
+        items: []
+      });
+
+      saveMenuStructure();
+      renderAdminTabContent();
+      showToast(`Đã thêm nhóm: ${title}`);
+    };
+
+    window.addNewScreen = function() {
+      const groupKey = document.getElementById('screen-group-select').value;
+      const id = document.getElementById('new-scr-id').value.trim();
+      const name = document.getElementById('new-scr-name').value.trim();
+      const eduCode = document.getElementById('new-scr-educode').value.trim() || '-';
+      
+      if (!groupKey) {
+        alert("Vui lòng chọn nhóm menu!");
+        return;
+      }
+      if (!id || !name) {
+        alert("Vui lòng điền Mã ID và Tên màn hình!");
+        return;
+      }
+      if (screensMap[id]) {
+        alert("Mã màn hình này đã tồn tại trong phân hệ!");
+        return;
+      }
+
+      const selectedTables = [];
+      document.querySelectorAll('input[name="screen-tables"]:checked').forEach(cb => {
+        selectedTables.push(cb.value);
+      });
+
+      const newScreen = {
+        id: id,
+        moduleId: selectedModuleId,
+        name: name,
+        eduCode: eduCode,
+        tables: selectedTables,
+        description: '',
+        status: 'Chưa xử lý',
+        jiraUrl: '',
+        actualUrl: ''
+      };
+      
+      screensMap[id] = newScreen;
+
+      const parts = groupKey.split('-');
+      const mIdx = parseInt(parts[0]);
+      const gIdx = parseInt(parts[1]);
+      activeMenuStructure[mIdx].items[gIdx].items.push({ id, name });
+
+      saveMenuStructure();
+      
+      if (isFirebaseEnabled && firestoreDb) {
+        const docId = `${selectedModuleId}_${id}`;
+        firestoreDb.collection('screens').doc(docId).set({
+          ...newScreen,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      } else {
+        localStorage.setItem(STORAGE_KEY + '_' + selectedModuleId, JSON.stringify(screensMap));
+      }
+
+      renderAdminTabContent();
+      showToast(`Đã thêm màn hình ${id}`);
+    };
+
+    window.deleteScreenPrompt = function(screenId) {
+      if (confirm(`CẢNH BÁO: Bạn có chắc chắn muốn xóa màn hình [${screenId}] và mọi ghi chú tiến trình không?`)) {
+        activeMenuStructure.forEach(modNode => {
+          modNode.items.forEach(grpNode => {
+            if (grpNode.items) {
+              grpNode.items = grpNode.items.filter(item => item.id !== screenId);
+            }
+          });
+        });
+
+        if (isFirebaseEnabled && firestoreDb) {
+          const docId = `${selectedModuleId}_${screenId}`;
+          firestoreDb.collection('screens').doc(docId).delete();
+        }
+
+        delete screensMap[screenId];
+        localStorage.setItem(STORAGE_KEY + '_' + selectedModuleId, JSON.stringify(screensMap));
+
+        saveMenuStructure();
+        renderAdminTabContent();
+        showToast(`Đã xóa màn hình ${screenId}`);
+      }
+    };
+
+    function saveMenuStructure() {
+      if (isFirebaseEnabled && firestoreDb) {
+        firestoreDb.collection('menu_structures').doc(selectedModuleId).set({
+          moduleId: selectedModuleId,
+          structure: activeMenuStructure
+        });
+      } else {
+        localStorage.setItem(STORAGE_KEY + '_structure_' + selectedModuleId, JSON.stringify(activeMenuStructure));
+      }
+      updateProgressMetrics();
+      renderContent();
+    }
+
+    // Tab Database Schema CRUD
+    function renderDatabaseAdmin(container) {
+      container.innerHTML = `
+        <div class="admin-panel-title" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+          <span>Quản lý Bảng Cơ sở dữ liệu (Tables & Schema)</span>
+          <div style="display:flex; gap:8px;">
+            <button class="admin-btn secondary" style="padding:4px 10px; font-size:11px;" onclick="exportTableSchemaJSON()" title="Xuất cấu trúc bảng ra file JSON">📤 Export Schema</button>
+            <button class="admin-btn secondary" style="padding:4px 10px; font-size:11px;" onclick="triggerImportTableSchema()" title="Nhập cấu trúc bảng từ file JSON">📥 Import Schema</button>
+            <button class="admin-btn primary" style="padding:4px 10px; font-size:11px;" onclick="syncSqlSchemaFromJSON()">⚡ Đồng bộ SQL Schema</button>
+            <input type="file" id="import-schema-file-input" style="display:none;" accept=".json" onchange="importTableSchemaJSON(event)">
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns: 1.2fr 1.8fr; gap:20px; height: calc(100% - 40px); overflow:hidden;">
+          <!-- LEFT SIDE: Table List & Search & Create Table -->
+          <div style="overflow-y:auto; padding-right:12px; border-right:1px solid var(--card-border); display:flex; flex-direction:column; gap:12px;">
+            <!-- Expandable Add Table Form -->
+            <div style="background:var(--item-hover); padding:10px; border-radius:8px; border:1px solid var(--card-border);">
+              <h4 style="font-size:11px; font-weight:700; margin:0; color:var(--text-main); text-transform:uppercase; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleAddTableForm()">
+                <span>➕ Tạo Bảng mới (Table)</span>
+                <span id="add-table-toggle-icon">▼</span>
+              </h4>
+              <div id="add-table-form-fields" class="hidden" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
+                <div class="admin-input-group">
+                  <label style="font-size:10px; margin-bottom:2px;">Mã Bảng (Ví dụ: DM_ChungChi)</label>
+                  <input type="text" id="new-tbl-id" class="admin-input" style="padding:4px 8px; font-size:11px;" placeholder="Mã vật lý...">
+                </div>
+                <div class="admin-input-group">
+                  <label style="font-size:10px; margin-bottom:2px;">Tên/Mô tả bảng</label>
+                  <input type="text" id="new-tbl-title" class="admin-input" style="padding:4px 8px; font-size:11px;" placeholder="Ví dụ: Danh mục Chứng chỉ...">
+                </div>
+                <div class="admin-input-group">
+                  <label style="font-size:10px; margin-bottom:2px;">Nhóm sơ đồ (Group)</label>
+                  <select id="new-tbl-group" class="admin-input" style="padding:4px 8px; font-size:11px;">
+                    <option value="general">Chung (Master)</option>
+                    <option value="majors">Ngành / Khóa</option>
+                    <option value="subjects">Môn học / ĐK</option>
+                    <option value="curriculum">Khung CTK</option>
+                    <option value="classes">Lớp & Phân môn</option>
+                    <option value="schedule">Lịch / Giảng dạy</option>
+                  </select>
+                </div>
+                <button class="admin-btn primary" style="width:100%; padding:5px; font-size:11px;" onclick="addTable()">Thêm Bảng</button>
+              </div>
+            </div>
+            
+            <!-- Table list with search -->
+            <div style="display:flex; flex-direction:column; gap:8px; flex:1; overflow:hidden;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h4 style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Danh sách Table (${tables.length})</h4>
+              </div>
+              <input type="text" id="admin-table-search" class="admin-input" style="padding:6px; font-size:12px;" placeholder="Tìm nhanh bảng..." oninput="filterAdminTables(this.value)">
+              
+              <div id="admin-tables-list-container" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:6px; padding-right:4px;">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+          </div>
+          
+          <!-- RIGHT SIDE: Detailed Column Schema View & Edit -->
+          <div id="admin-table-details-panel" style="overflow-y:auto; padding-right:4px; display:flex; flex-direction:column; gap:16px;">
+            <div style="display:flex; height:100%; justify-content:center; align-items:center; color:var(--text-muted); font-size:12px; border: 2px dashed var(--card-border); border-radius:12px; background:rgba(0,0,0,0.01);">
+              👈 Chọn một bảng từ danh sách bên trái để xem cấu trúc và chỉnh sửa cột
+            </div>
+          </div>
+        </div>
+      `;
+      
+      renderAdminTablesList();
+      
+      if (activeEditTableId) {
+        editTableColumnsPrompt(activeEditTableId);
+      }
+    }
+
+    window.toggleAddTableForm = function() {
+      const fields = document.getElementById('add-table-form-fields');
+      const icon = document.getElementById('add-table-toggle-icon');
+      if (fields.classList.contains('hidden')) {
+        fields.classList.remove('hidden');
+        icon.innerText = '▲';
+      } else {
+        fields.classList.add('hidden');
+        icon.innerText = '▼';
+      }
+    };
+
+    window.filterAdminTables = function(val) {
+      renderAdminTablesList(val.trim().toLowerCase());
+    };
+
+    window.renderAdminTablesList = function(query = '') {
+      const container = document.getElementById('admin-tables-list-container');
+      if (!container) return;
+      
+      const filtered = tables.filter(t => {
+        return t.id.toLowerCase().includes(query) || t.title.toLowerCase().includes(query);
+      });
+      
+      container.innerHTML = filtered.map(t => {
+        const isActive = t.id === activeEditTableId;
+        const activeStyles = isActive ? 'border:1px solid var(--accent-color); background:rgba(99,102,241,0.05);' : 'border:1px solid var(--card-border);';
+        
+        return `
+          <div class="admin-list-card" style="margin-bottom:2px; padding:8px 12px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; border-radius:8px; transition:all 0.15s; ${activeStyles}" onclick="editTableColumnsPrompt('${t.id}')">
+            <div>
+              <strong style="color:${isActive ? 'var(--accent-color)' : 'var(--text-main)'}; font-size:12px;">${t.id}</strong>
+              <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${t.title}</div>
+              <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Cột: ${t.columns ? t.columns.length : 0} | FK: ${t.relations ? t.relations.length : 0}</div>
+            </div>
+            <svg style="width:14px; height:14px; fill:var(--text-muted);" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+          </div>
+        `;
+      }).join('') || '<div style="color:var(--text-muted); font-size:11px; text-align:center; padding:12px;">Không tìm thấy bảng nào.</div>';
+    };
+
+    window.toggleColumnVisibility = function(tableId, columnName, isChecked) {
+      const t = tables.find(tbl => tbl.id === tableId);
+      if (!t) return;
+      
+      const col = t.columns.find(c => c.name === columnName);
+      if (!col) return;
+      
+      col.visible = isChecked;
+      saveTableSchemaToCloud(t);
+      showToast(`Đã ${isChecked ? 'hiện' : 'ẩn'} cột ${columnName} trên sơ đồ`);
+    };
+
+    let activeEditTableId = null;
+
+    window.addTable = function() {
+      const id = document.getElementById('new-tbl-id').value.trim();
+      const title = document.getElementById('new-tbl-title').value.trim();
+      const group = document.getElementById('new-tbl-group').value;
+
+      if (!id || !title) {
+        alert("Vui lòng nhập Mã Bảng và Tiêu đề bảng!");
+        return;
+      }
+      if (!/^[a-zA-Z0-9_]+$/.test(id)) {
+        alert("Mã bảng chỉ chứa chữ, số và gạch dưới!");
+        return;
+      }
+      if (tables.some(t => t.id === id)) {
+        alert("Bảng này đã tồn tại!");
+        return;
+      }
+
+      const newTable = {
+        id: id,
+        name: id,
+        title: title,
+        group: group,
+        x: 150,
+        y: 150,
+        columns: [{ name: "Id", type: "int", key: "PK" }],
+        relations: []
+      };
+
+      tables.push(newTable);
+
+      saveTableSchemaToCloud(newTable);
+      renderAdminTabContent();
+      showToast(`Đã thêm bảng ${id}`);
+    };
+
+    window.deleteTablePrompt = function(tableId) {
+      // Warnings before deleting as requested by user
+      if (confirm(`⚠️ CẢNH BÁO QUAN TRỌNG:\nXóa bảng [${tableId}] sẽ:\n1. Gỡ liên kết bảng này khỏi tất cả các màn hình đang tham chiếu.\n2. Xóa bảng vĩnh viễn khỏi sơ đồ quan hệ cơ sở dữ liệu.\n\nBạn có chắc chắn muốn xóa bảng này không?`)) {
+        tables = tables.filter(t => t.id !== tableId);
+
+        // Scan and clean screen related tables
+        Object.keys(screensMap).forEach(scrId => {
+          if (screensMap[scrId].tables) {
+            const beforeLen = screensMap[scrId].tables.length;
+            screensMap[scrId].tables = screensMap[scrId].tables.filter(t => t !== tableId);
+            if (screensMap[scrId].tables.length !== beforeLen) {
+              saveProgress(scrId);
+            }
+          }
+        });
+
+        if (isFirebaseEnabled && firestoreDb) {
+          firestoreDb.collection('tables').doc(tableId).delete();
+        } else {
+          localStorage.setItem(STORAGE_KEY + '_tables_schema', JSON.stringify(tables));
+        }
+
+        renderAdminTabContent();
+        showToast(`Đã xóa bảng ${tableId} thành công!`);
+      }
+    };
+
+    window.editTableColumnsPrompt = function(tableId) {
+      activeEditTableId = tableId;
+      const t = tables.find(tbl => tbl.id === tableId);
+      if (!t) return;
+
+      renderAdminTablesList(document.getElementById('admin-table-search')?.value?.trim()?.toLowerCase() || '');
+
+      const detailPanel = document.getElementById('admin-table-details-panel');
+      if (!detailPanel) return;
+
+      const tablesSelectOptionsHtml = `<option value="">-- Chọn bảng đích --</option>` + tables.map(tbl => `
+        <option value="${tbl.id}">${tbl.id}</option>
+      `).join('');
+
+      detailPanel.innerHTML = `
+        <div style="border: 1px solid var(--card-border); padding:16px; border-radius:12px; background:var(--card-bg); display:flex; flex-direction:column; gap:16px;">
+          <!-- Table Header Details -->
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px solid var(--card-border); padding-bottom:12px;">
+            <div>
+              <span class="table-badge badge-${t.group}" style="font-size:9px; font-weight:700; text-transform:uppercase; padding:2px 6px; border-radius:4px;">${t.group}</span>
+              <h3 style="font-family:monospace; font-size:16px; margin:4px 0 2px 0; color:var(--text-main);">${t.id}</h3>
+              <p style="font-size:12px; color:var(--text-muted); margin:0;">${t.title}</p>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="admin-btn secondary" style="padding:4px 10px; font-size:11px;" onclick="hideSchemaEditor()">Đóng</button>
+              <button class="admin-btn danger" style="padding:4px 10px; font-size:11px;" onclick="deleteTablePrompt('${t.id}')">Xóa Bảng</button>
+            </div>
+          </div>
+
+          <!-- 2 Column details layout -->
+          <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:16px;">
+            <!-- Column List section -->
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <h4 style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin:0 0 4px 0;">Cột dữ liệu (${t.columns.length})</h4>
+              
+              <div style="max-height: 240px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; padding-right:4px;">
+                ${t.columns.map(col => {
+                  const isPk = col.key === 'PK';
+                  const isFk = col.key === 'FK';
+                  const keyText = isPk ? '[PK]' : (isFk ? '[FK]' : '');
+                  const keyColor = isPk ? '#ef4444' : (isFk ? '#3b82f6' : 'transparent');
+                  
+                  return `
+                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; padding:6px 8px; background:rgba(0,0,0,0.02); border:1px solid var(--card-border); border-radius:6px;">
+                      <div style="display:flex; align-items:center; gap:6px; flex:1; min-width:0;">
+                        <span style="color:${keyColor}; font-weight:bold; font-family:monospace; font-size:9px; width:24px; flex-shrink:0;">${keyText}</span>
+                        <span style="font-family:monospace; color:var(--text-main); font-weight:600; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" title="${col.name}">${col.name}</span>
+                        <span style="color:var(--text-muted); font-size:10px; font-family:monospace; flex-shrink:0;">(${col.type})</span>
+                      </div>
+                      <div style="display:flex; align-items:center; gap:8px;">
+                        <label style="display:flex; align-items:center; gap:3px; font-size:10px; cursor:pointer;" title="Hiện cột trên diagram">
+                          <input type="checkbox" ${col.visible !== false ? 'checked' : ''} onchange="toggleColumnVisibility('${t.id}', '${col.name}', this.checked)">
+                          👁️
+                        </label>
+                        <button class="close-modal-btn" style="font-size:12px; color:#ef4444; width:16px; height:16px; margin:0;" onclick="deleteColumnFromTable('${col.name}')">&times;</button>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+
+              <!-- Add Column form inline -->
+              <div style="background:var(--item-hover); padding:10px; border-radius:8px; border:1px solid var(--card-border); margin-top:8px;">
+                <h5 style="font-size:10px; font-weight:700; color:var(--text-muted); margin:0 0 6px 0; text-transform:uppercase;">Thêm Cột mới</h5>
+                <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:6px; margin-bottom:6px;">
+                  <input type="text" id="new-col-name" class="admin-input" style="padding:4px 6px; font-size:11px;" placeholder="Tên cột...">
+                  <input type="text" id="new-col-type" class="admin-input" style="padding:4px 6px; font-size:11px;" placeholder="Kiểu (int)...">
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                  <label style="font-size:10px; color:var(--text-main); display:flex; align-items:center; gap:3px;">
+                    <input type="checkbox" id="new-col-pk"> Khóa chính PK
+                  </label>
+                  <label style="font-size:10px; color:var(--text-main); display:flex; align-items:center; gap:3px;">
+                    <input type="checkbox" id="new-col-fk"> Khóa ngoại FK
+                  </label>
+                </div>
+                <button class="admin-btn secondary" style="width:100%; padding:4px; font-size:11px;" onclick="addColumnToTable()">Thêm Cột</button>
+              </div>
+            </div>
+
+            <!-- Relationships & Add Relation -->
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <h4 style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin:0 0 4px 0;">Liên kết quan hệ (FK)</h4>
+              
+              <div style="max-height: 120px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; padding-right:4px;">
+                ${t.relations.map((rel, rIdx) => `
+                  <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; padding:6px; background:rgba(0,0,0,0.02); border:1px solid var(--card-border); border-radius:6px;">
+                    <span style="font-family:monospace; color:var(--text-main); text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">
+                      ${rel.fromCol} → <strong style="color:var(--accent-color);">${rel.toTable}</strong>(${rel.toCol})
+                    </span>
+                    <button class="close-modal-btn" style="font-size:12px; color:#ef4444; width:16px; height:16px; margin:0;" onclick="deleteRelationFromTable(${rIdx})">&times;</button>
+                  </div>
+                `).join('') || '<div style="font-size:10px; color:var(--text-muted); text-align:center; padding:8px;">Không có liên kết ngoại.</div>'}
+              </div>
+
+              <!-- Add Relation form inline -->
+              <div style="background:var(--item-hover); padding:10px; border-radius:8px; border:1px solid var(--card-border); margin-top:8px;">
+                <h5 style="font-size:10px; font-weight:700; color:var(--text-muted); margin:0 0 6px 0; text-transform:uppercase;">Thêm liên kết quan hệ</h5>
+                <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:6px;">
+                  <select id="rel-target-table" class="admin-input" style="padding:4px; font-size:11px;">
+                    ${tablesSelectOptionsHtml}
+                  </select>
+                  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+                    <input type="text" id="rel-from-col" class="admin-input" style="padding:4px; font-size:11px;" placeholder="Cột nguồn (ID)...">
+                    <input type="text" id="rel-to-col" class="admin-input" style="padding:4px; font-size:11px;" placeholder="Cột đích (Id)...">
+                  </div>
+                </div>
+                <button class="admin-btn secondary" style="width:100%; padding:4px; font-size:11px;" onclick="addRelationToTable()">Thêm Liên Kết</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    };
+
+    window.hideSchemaEditor = function() {
+      activeEditTableId = null;
+      renderAdminTablesList();
+      const detailPanel = document.getElementById('admin-table-details-panel');
+      if (detailPanel) {
+        detailPanel.innerHTML = `
+          <div style="display:flex; height:100%; justify-content:center; align-items:center; color:var(--text-muted); font-size:12px; border: 2px dashed var(--card-border); border-radius:12px; background:rgba(0,0,0,0.01);">
+            👈 Chọn một bảng từ danh sách bên trái để xem cấu trúc và chỉnh sửa cột
+          </div>
+        `;
+      }
+    };
+
+    window.addColumnToTable = function() {
+      if (!activeEditTableId) return;
+      const name = document.getElementById('new-col-name').value.trim();
+      const type = document.getElementById('new-col-type').value.trim();
+      const isPk = document.getElementById('new-col-pk').checked;
+      const isFk = document.getElementById('new-col-fk').checked;
+
+      if (!name || !type) {
+        alert("Vui lòng điền tên cột và kiểu dữ liệu!");
+        return;
+      }
+
+      const t = tables.find(tbl => tbl.id === activeEditTableId);
+      if (!t) return;
+
+      if (t.columns.some(col => col.name === name)) {
+        alert("Cột này đã tồn tại!");
+        return;
+      }
+
+      let key = "";
+      if (isPk) key = "PK";
+      else if (isFk) key = "FK";
+
+      t.columns.push({ name, type, key });
+
+      saveTableSchemaToCloud(t);
+      editTableColumnsPrompt(activeEditTableId);
+      showToast(`Đã thêm cột ${name}`);
+
+      document.getElementById('new-col-name').value = '';
+      document.getElementById('new-col-type').value = '';
+      document.getElementById('new-col-pk').checked = false;
+      document.getElementById('new-col-fk').checked = false;
+    };
+
+    window.deleteColumnFromTable = function(colName) {
+      if (!activeEditTableId) return;
+      const t = tables.find(tbl => tbl.id === activeEditTableId);
+      if (!t) return;
+
+      if (confirm(`Bạn có muốn xóa cột [${colName}] khỏi bảng [${activeEditTableId}] không?`)) {
+        t.columns = t.columns.filter(col => col.name !== colName);
+        saveTableSchemaToCloud(t);
+        editTableColumnsPrompt(activeEditTableId);
+        showToast("Đã xóa cột thành công.");
+      }
+    };
+
+    window.addRelationToTable = function() {
+      if (!activeEditTableId) return;
+      const targetTable = document.getElementById('rel-target-table').value;
+      const fromCol = document.getElementById('rel-from-col').value.trim();
+      const toCol = document.getElementById('rel-to-col').value.trim();
+
+      if (!targetTable || !fromCol || !toCol) {
+        alert("Vui lòng chọn bảng đích và nhập cột!");
+        return;
+      }
+
+      const t = tables.find(tbl => tbl.id === activeEditTableId);
+      if (!t) return;
+
+      t.relations.push({
+        toTable: targetTable,
+        fromCol: fromCol,
+        toCol: toCol
+      });
+
+      saveTableSchemaToCloud(t);
+      editTableColumnsPrompt(activeEditTableId);
+      showToast("Đã thêm liên kết quan hệ.");
+
+      document.getElementById('rel-from-col').value = '';
+      document.getElementById('rel-to-col').value = '';
+    };
+
+    window.deleteRelationFromTable = function(index) {
+      if (!activeEditTableId) return;
+      const t = tables.find(tbl => tbl.id === activeEditTableId);
+      if (!t) return;
+
+      if (confirm("Bạn có chắc chắn muốn xóa liên kết này không?")) {
+        t.relations.splice(index, 1);
+        saveTableSchemaToCloud(t);
+        editTableColumnsPrompt(activeEditTableId);
+        showToast("Đã gỡ liên kết thành công.");
+      }
+    };
+
+    function saveTableSchemaToCloud(t) {
+      if (isFirebaseEnabled && firestoreDb) {
+        firestoreDb.collection('tables').doc(t.id).set({
+          tableId: t.id,
+          tableName: t.title,
+          group: t.group,
+          x: t.x !== undefined ? t.x : 150,
+          y: t.y !== undefined ? t.y : 150,
+          columns: t.columns || [],
+          relations: t.relations || []
+        });
+      } else {
+        localStorage.setItem(STORAGE_KEY + '_tables_schema', JSON.stringify(tables));
+      }
+      renderContent();
+    }
+
+    window.syncSqlSchemaFromJSON = async function() {
+      if (confirm("Bạn có chắc chắn muốn đồng bộ toàn bộ 37 bảng từ file SQL Schema cấu trúc mới lên Firebase Firestore? Hành động này sẽ ghi đè các bảng trùng tên.")) {
+        try {
+          if (typeof SQL_TABLES_SCHEMA === 'undefined' || !Array.isArray(SQL_TABLES_SCHEMA) || SQL_TABLES_SCHEMA.length === 0) {
+            alert("Không thể tìm thấy cấu trúc SQL Schema (hoặc dữ liệu không hợp lệ).");
+            return;
+          }
+
+          const sqlTables = SQL_TABLES_SCHEMA;
+
+          if (isFirebaseEnabled && firestoreDb) {
+            showToast("Đang đồng bộ lên Firebase...");
+            const batch = firestoreDb.batch();
+            
+            sqlTables.forEach(t => {
+              const docRef = firestoreDb.collection('tables').doc(t.id);
+              batch.set(docRef, {
+                tableId: t.id,
+                tableName: t.title,
+                group: t.group,
+                x: t.x || Math.floor(Math.random() * 800) + 100,
+                y: t.y || Math.floor(Math.random() * 500) + 100,
+                columns: t.columns || [],
+                relations: t.relations || []
+              });
+            });
+            
+            await batch.commit();
+            showToast(`Đã đồng bộ thành công ${sqlTables.length} bảng lên Cloud!`);
+          } else {
+            // Local fallback
+            tables = sqlTables;
+            localStorage.setItem(STORAGE_KEY + '_tables_schema', JSON.stringify(tables));
+            showToast(`Đã đồng bộ cục bộ ${sqlTables.length} bảng thành công!`);
+          }
+          
+          renderContent();
+          renderAdminTabContent();
+        } catch (err) {
+          console.error("Lỗi khi đồng bộ SQL Schema:", err);
+          alert("Lỗi đồng bộ: " + err.message);
+        }
+      }
+    };
+
+    window.exportTableSchemaJSON = function() {
+      try {
+        const blob = new Blob([JSON.stringify(tables, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.href = url;
+        downloadAnchor.download = "database_tables_schema_backup.json";
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+        URL.revokeObjectURL(url);
+        showToast("Đã xuất file cấu trúc bảng (Schema JSON) thành công!");
+      } catch (err) {
+        console.error("Lỗi xuất file Schema:", err);
+        alert("Lỗi khi xuất file: " + err.message);
+      }
+    };
+
+    window.triggerImportTableSchema = function() {
+      document.getElementById('import-schema-file-input').click();
+    };
+
+    window.importTableSchemaJSON = function(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (!Array.isArray(parsed) || parsed.length === 0) {
+            throw new Error("Dữ liệu cấu trúc bảng phải là một mảng JSON hợp lệ.");
+          }
+
+          const isValid = parsed.every(t => t.id && Array.isArray(t.columns));
+          if (!isValid) {
+            throw new Error("Định dạng file Schema JSON không đúng (mỗi bảng phải có trường id và mảng columns).");
+          }
+
+          if (confirm(`Bạn có chắc chắn muốn nhập ${parsed.length} bảng từ file JSON không? Việc này sẽ ghi đè và đồng bộ toàn bộ cấu trúc lên Firestore (nếu có kết nối Cloud).`)) {
+            tables = parsed;
+            
+            if (isFirebaseEnabled && firestoreDb) {
+              showToast("Đang đồng bộ Schema mới lên Cloud...");
+              const batch = firestoreDb.batch();
+              
+              tables.forEach(t => {
+                const docRef = firestoreDb.collection('tables').doc(t.id);
+                batch.set(docRef, {
+                  tableId: t.id,
+                  tableName: t.title || t.id,
+                  group: t.group || 'general',
+                  x: t.x !== undefined ? t.x : 150,
+                  y: t.y !== undefined ? t.y : 150,
+                  columns: t.columns || [],
+                  relations: t.relations || []
+                });
+              });
+              
+              await batch.commit();
+              showToast("Đã đồng bộ thành công cấu trúc Schema mới lên Cloud!");
+            } else {
+              localStorage.setItem(STORAGE_KEY + '_tables_schema', JSON.stringify(tables));
+              showToast("Đã cập nhật cấu trúc Schema cục bộ thành công!");
+            }
+
+            renderContent();
+            renderAdminTabContent();
+          }
+        } catch (err) {
+          console.error("Lỗi đọc file Schema:", err);
+          alert("Lỗi khi đọc file cấu trúc: " + err.message);
+        } finally {
+          event.target.value = '';
+        }
+      };
+      reader.readAsText(file);
+    };
+
+    // INITIALIZATION
+    window.onload = () => {
+      fetchFirebaseConfig();
+    };
+  </script>
+
+  <!-- ADMIN SETTINGS MODAL -->
+  <div class="admin-modal-overlay" id="admin-modal">
+    <div class="admin-modal-card">
+      <div class="admin-modal-header">
+        <h3>⚙️ Cấu hình Hệ thống & Quản trị</h3>
+        <button class="close-modal-btn" onclick="closeAdminSettings()">&times;</button>
+      </div>
+      <div class="admin-modal-body">
+        <div class="admin-sidebar">
+          <button class="admin-tab-btn active" id="tab-btn-modules" onclick="switchAdminTab('modules')">Quản lý Phân hệ</button>
+          <button class="admin-tab-btn" id="tab-btn-screens" onclick="switchAdminTab('screens')">Quản lý Màn hình</button>
+          <button class="admin-tab-btn" id="tab-btn-database" onclick="switchAdminTab('database')">Quản lý Table DB</button>
+        </div>
+        <div class="admin-content-area" id="admin-tab-content">
+          <!-- Loaded dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
