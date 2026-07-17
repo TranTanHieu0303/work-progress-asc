@@ -33,13 +33,13 @@
       --status-todo-text: #475569;
       --status-todo-border: #cbd5e1;
       
-      --status-progress-bg: #e0f2fe;
-      --status-progress-text: #0284c7;
-      --status-progress-border: #bae6fd;
+      --status-progress-bg: #fffbeb;
+      --status-progress-text: #b45309;
+      --status-progress-border: #fde68a;
       
-      --status-done-bg: #dcfce7;
-      --status-done-text: #15803d;
-      --status-done-border: #86efac;
+      --status-done-bg: #ecfdf5;
+      --status-done-text: #047857;
+      --status-done-border: #a7f3d0;
       
       --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
       --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
@@ -62,17 +62,17 @@
       --sidebar-border: rgba(255, 255, 255, 0.06);
       --item-hover: rgba(255, 255, 255, 0.03);
       
-      --status-todo-bg: rgba(71, 85, 105, 0.2);
+      --status-todo-bg: rgba(148, 163, 184, 0.1);
       --status-todo-text: #94a3b8;
       --status-todo-border: rgba(148, 163, 184, 0.3);
       
-      --status-progress-bg: rgba(2, 132, 199, 0.15);
-      --status-progress-text: #38bdf8;
-      --status-progress-border: rgba(56, 189, 248, 0.3);
+      --status-progress-bg: rgba(217, 119, 6, 0.15);
+      --status-progress-text: #fbbf24;
+      --status-progress-border: rgba(251, 191, 36, 0.3);
       
-      --status-done-bg: rgba(21, 128, 61, 0.15);
-      --status-done-text: #4ade80;
-      --status-done-border: rgba(74, 222, 128, 0.3);
+      --status-done-bg: rgba(16, 185, 129, 0.15);
+      --status-done-text: #34d399;
+      --status-done-border: rgba(52, 211, 153, 0.3);
       
       --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
       --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
@@ -1136,17 +1136,318 @@
       align-items: center;
       background: var(--card-bg);
     }
+
+    /* =============================================
+       RESPONSIVE - HAMBURGER MENU BUTTON
+    ============================================= */
+    .mobile-menu-btn {
+      display: none;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      justify-content: center;
+      align-items: center;
+      background: transparent;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--text-main);
+      flex-shrink: 0;
+    }
+    .mobile-menu-btn:hover {
+      background: var(--item-hover);
+    }
+    .mobile-menu-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    /* Mobile overlay backdrop */
+    .mobile-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(2px);
+      z-index: 150;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .mobile-overlay.active {
+      display: block;
+      opacity: 1;
+    }
+
+    /* =============================================
+       TABLET: 769px – 1024px
+    ============================================= */
+    @media (max-width: 1024px) and (min-width: 769px) {
+      aside {
+        width: 260px;
+        padding: 18px 14px;
+      }
+      #module-select {
+        min-width: 160px;
+        font-size: 12px;
+        padding: 6px 28px 6px 12px;
+      }
+      .cloud-status-badge .status-text {
+        display: none;
+      }
+      .cloud-status-badge {
+        padding: 6px 8px;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        justify-content: center;
+      }
+      .grid-layout {
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      }
+      .btn {
+        padding: 7px 10px;
+        font-size: 12px;
+        gap: 5px;
+      }
+    }
+
+    /* =============================================
+       MOBILE: ≤ 768px
+    ============================================= */
+    @media (max-width: 768px) {
+
+      /* --- BODY LAYOUT --- */
+      body {
+        overflow: hidden;
+      }
+
+      /* --- HEADER --- */
+      header {
+        height: auto;
+        min-height: 56px;
+        padding: 10px 14px;
+        flex-wrap: wrap;
+        gap: 8px;
+        position: relative;
+        z-index: 200;
+      }
+      .header-left {
+        gap: 8px;
+        flex: 1;
+        min-width: 0;
+      }
+      .logo-badge {
+        font-size: 13px;
+        padding: 6px 9px;
+        flex-shrink: 0;
+      }
+      .header-title-container h1 {
+        font-size: 13px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .header-title-container p {
+        display: none;
+      }
+      .module-selector-container {
+        display: none;
+      }
+      .header-right {
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      /* Hamburger button visible on mobile */
+      .mobile-menu-btn {
+        display: flex;
+      }
+      /* Cloud status: chỉ hiện dot */
+      .cloud-status-badge .status-text {
+        display: none;
+      }
+      .cloud-status-badge {
+        padding: 6px 8px;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        justify-content: center;
+      }
+      /* Ẩn text trong các button, giữ icon */
+      .btn-text-label {
+        display: none;
+      }
+      .btn {
+        padding: 7px 9px;
+        gap: 0;
+      }
+      /* Ẩn Export, Import, Reset text (chỉ icon) */
+      #export-btn .btn-text-label,
+      #import-btn .btn-text-label,
+      #reset-btn .btn-text-label,
+      #admin-settings-btn .btn-text-label {
+        display: none;
+      }
+
+      /* --- SIDEBAR (mobile: fixed, slide-in) --- */
+      aside {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 85vw;
+        max-width: 320px;
+        height: 100vh;
+        z-index: 200;
+        padding: 70px 18px 24px;
+        overflow-y: auto;
+        transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
+      }
+      aside.mobile-open {
+        left: 0;
+      }
+
+      /* --- WORKSPACE --- */
+      .workspace {
+        flex-direction: column;
+      }
+
+      /* --- MAIN CONTENT --- */
+      main {
+        padding: 16px;
+        overflow-y: auto;
+        height: calc(100vh - 56px);
+        flex: none;
+      }
+      .main-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      .view-mode-selector {
+        width: 100%;
+        justify-content: stretch;
+      }
+      .view-mode-btn {
+        flex: 1;
+        justify-content: center;
+        font-size: 11px;
+        padding: 6px 8px;
+      }
+      #view-title {
+        font-size: 16px !important;
+      }
+
+      /* --- TREE VIEW --- */
+      .module-header {
+        padding: 12px 14px;
+      }
+      .module-title {
+        font-size: 14px;
+      }
+      .module-body {
+        padding: 12px 12px;
+      }
+      .group-body {
+        padding: 8px 10px;
+      }
+      .screen-main-row {
+        padding: 10px 12px;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .screen-info-block {
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .screen-controls {
+        gap: 8px;
+        margin-left: auto;
+      }
+      .screen-edu-code {
+        display: none;
+      }
+
+      /* --- CARD GRID --- */
+      .grid-layout {
+        grid-template-columns: 1fr;
+      }
+
+      /* --- ADMIN MODAL --- */
+      .admin-modal-card {
+        width: 95vw;
+        height: 90vh;
+      }
+      .admin-modal-body {
+        flex-direction: column;
+      }
+      .admin-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--card-border);
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 8px;
+        gap: 4px;
+        flex-shrink: 0;
+      }
+      .admin-tab-btn {
+        white-space: nowrap;
+        padding: 8px 12px;
+        font-size: 12px;
+      }
+      .admin-content-area {
+        padding: 16px;
+      }
+
+      /* --- TOAST --- */
+      .toast-container {
+        left: 16px;
+        right: 16px;
+        bottom: 16px;
+      }
+      .toast {
+        max-width: 100%;
+      }
+
+      /* --- PROGRESS PANEL --- */
+      .progress-panel {
+        padding: 12px;
+      }
+      .progress-pct {
+        font-size: 20px;
+      }
+    }
+
+    /* =============================================
+       MOBILE TINY: ≤ 375px  
+    ============================================= */
+    @media (max-width: 375px) {
+      .logo-badge {
+        display: none;
+      }
+      .btn {
+        padding: 6px 7px;
+      }
+    }
   </style>
 </head>
 <body>
 
+  <!-- MOBILE SIDEBAR OVERLAY -->
+  <div class="mobile-overlay" id="mobile-overlay" onclick="closeMobileSidebar()"></div>
+
   <!-- HEADER -->
   <header>
     <div class="header-left">
+      <!-- Hamburger button (mobile only) -->
+      <button class="mobile-menu-btn" id="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Mở/Đóng menu">
+        <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+      </button>
       <div class="logo-badge">EDU</div>
       <div class="header-title-container">
         <h1>Quản lý Tiến độ Phân hệ</h1>
-        <p>Hệ thống theo dõi cấu trúc & tiến độ dự án</p>
+        <p>Hệ thống theo dõi cấu trúc &amp; tiến độ dự án</p>
       </div>
       <!-- Module Selector -->
       <div class="module-selector-container">
@@ -1164,24 +1465,27 @@
         <span class="status-text">Local Sync</span>
       </div>
 
+      <!-- Lock/Unlock toggle button -->
+      <button class="btn" id="lock-toggle-btn" onclick="toggleLockMode()" style="display:none;"></button>
+
       <!-- Navigation buttons -->
       <a href="db_diagram.html" class="btn" title="Xem Sơ đồ Cơ sở Dữ liệu" style="text-decoration:none;">
         <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.04-.42 1.99-1.07 2.75z"/></svg>
-        Sơ đồ DB
+        <span class="btn-text-label">Sơ đồ DB</span>
       </a>
 
-      <button class="btn" id="admin-settings-btn" title="Cấu hình hệ thống & Quản trị" onclick="openAdminSettings()">
+      <button class="btn" id="admin-settings-btn" title="Cấu hình hệ thống &amp; Quản trị" onclick="openAdminSettings()">
         <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
-        Cấu hình
+        <span class="btn-text-label">Cấu hình</span>
       </button>
 
       <button class="btn" id="export-btn" title="Xuất tiến độ ra file JSON">
         <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
-        Export
+        <span class="btn-text-label">Export</span>
       </button>
       <button class="btn" id="import-btn" title="Nhập tiến độ từ file JSON">
         <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v-4h-4v4H7l5 5 5-5h-3z"/></svg>
-        Import
+        <span class="btn-text-label">Import</span>
       </button>
       <input type="file" id="import-file-input" accept=".json">
       
@@ -1415,6 +1719,9 @@
     let searchQuery = '';
     let viewMode = 'tree'; // 'tree' | 'card'
     let collapsedNodes = {}; // Tracks expanded state for tree nodes
+    let activeEditScreenId = null;
+    let adminScreenQuery = '';
+    let isEditMode = false;
 
     // LOCAL STORAGE CONFIG
     const STORAGE_KEY = 'edu_menu_manager_progress_v2';
@@ -1572,8 +1879,9 @@
     // GENERATE STATUS DROPDOWN HTML
     function getStatusDropdownHtml(itemId, status) {
       const cls = status === 'Đã xử lý' ? 'done' : (status === 'Đang xử lý' ? 'progress' : 'todo');
+      const isDisabled = isEditMode ? '' : 'disabled';
       return `
-        <select class="status-dropdown ${cls}" onchange="changeItemStatus('${itemId}', this.value)">
+        <select class="status-dropdown ${cls}" onchange="changeItemStatus('${itemId}', this.value)" ${isDisabled}>
           <option value="Chưa xử lý" ${status === 'Chưa xử lý' ? 'selected' : ''}>Chưa xử lý</option>
           <option value="Đang xử lý" ${status === 'Đang xử lý' ? 'selected' : ''}>Đang xử lý</option>
           <option value="Đã xử lý" ${status === 'Đã xử lý' ? 'selected' : ''}>Đã xử lý</option>
@@ -1583,6 +1891,10 @@
 
     // HANDLE STATUS CHANGE
     window.changeItemStatus = function(itemId, newStatus) {
+      if (!isEditMode) {
+        alert("Vui lòng mở khóa cấu hình để thay đổi trạng thái!");
+        return;
+      }
       if (screensMap[itemId]) {
         screensMap[itemId].status = newStatus;
         saveProgress(itemId);
@@ -1612,6 +1924,7 @@
 
     // HANDLE DESCRIPTION EDIT
     window.updateItemDescription = function(itemId, value) {
+      if (!isEditMode) return;
       if (screensMap[itemId]) {
         screensMap[itemId].description = value;
         saveProgress(itemId);
@@ -1621,6 +1934,7 @@
 
     // HANDLE JIRA URL EDIT
     window.updateItemJira = function(itemId, value) {
+      if (!isEditMode) return;
       if (screensMap[itemId]) {
         screensMap[itemId].jiraUrl = value;
         saveProgress(itemId);
@@ -1631,6 +1945,7 @@
 
     // HANDLE ACTUAL WEB URL EDIT
     window.updateItemActualUrl = function(itemId, value) {
+      if (!isEditMode) return;
       if (screensMap[itemId]) {
         screensMap[itemId].actualUrl = value;
         saveProgress(itemId);
@@ -1724,7 +2039,7 @@
                         Đã lưu
                       </span>
                     </div>
-                    <textarea class="desc-textarea" placeholder="Gõ ghi chú, mô tả cho màn hình dashboard này..." onblur="updateItemDescription('${screen.id}', this.value)">${screen.description || ''}</textarea>
+                    <textarea class="desc-textarea" placeholder="Gõ ghi chú, mô tả cho màn hình dashboard này..." onblur="updateItemDescription('${screen.id}', this.value)" ${isEditMode ? '' : 'readonly'} style="${isEditMode ? '' : 'cursor: default; background: rgba(0,0,0,0.02);'}">${screen.description || ''}</textarea>
                   </div>
                 </div>
               </div>
@@ -1772,11 +2087,11 @@
                   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px;">
                     <div class="details-row">
                       <div class="details-label">Link User Story (Jira)</div>
-                      <input type="text" placeholder="Dán link Jira US..." value="${screen.jiraUrl || ''}" onblur="updateItemJira('${screen.id}', this.value)" style="width:100%; padding:6px 10px; border-radius:6px; border:1px solid var(--card-border); background:var(--card-bg); color:var(--text-main); font-size:12px; outline:none;">
+                      <input type="text" placeholder="Dán link Jira US..." value="${screen.jiraUrl || ''}" onblur="updateItemJira('${screen.id}', this.value)" ${isEditMode ? '' : 'readonly'} style="width:100%; padding:6px 10px; border-radius:6px; border:1px solid var(--card-border); background:${isEditMode ? 'var(--card-bg)' : 'var(--item-hover)'}; color:var(--text-main); font-size:12px; outline:none; ${isEditMode ? '' : 'cursor: default;'}">
                     </div>
                     <div class="details-row">
                       <div class="details-label">Link Màn hình Web thực tế</div>
-                      <input type="text" placeholder="Dán link web chạy thực tế..." value="${screen.actualUrl || ''}" onblur="updateItemActualUrl('${screen.id}', this.value)" style="width:100%; padding:6px 10px; border-radius:6px; border:1px solid var(--card-border); background:var(--card-bg); color:var(--text-main); font-size:12px; outline:none;">
+                      <input type="text" placeholder="Dán link web chạy thực tế..." value="${screen.actualUrl || ''}" onblur="updateItemActualUrl('${screen.id}', this.value)" ${isEditMode ? '' : 'readonly'} style="width:100%; padding:6px 10px; border-radius:6px; border:1px solid var(--card-border); background:${isEditMode ? 'var(--card-bg)' : 'var(--item-hover)'}; color:var(--text-main); font-size:12px; outline:none; ${isEditMode ? '' : 'cursor: default;'}">
                     </div>
                   </div>
                   <div class="details-row">
@@ -1791,7 +2106,7 @@
                         Đã lưu
                       </span>
                     </div>
-                    <textarea class="desc-textarea" placeholder="Nhập ghi chú, mô tả logic, phân tích nghiệp vụ cho màn hình này..." onblur="updateItemDescription('${screen.id}', this.value)">${screen.description || ''}</textarea>
+                    <textarea class="desc-textarea" placeholder="Nhập ghi chú, mô tả logic, phân tích nghiệp vụ cho màn hình này..." onblur="updateItemDescription('${screen.id}', this.value)" ${isEditMode ? '' : 'readonly'} style="${isEditMode ? '' : 'cursor: default; background: rgba(0,0,0,0.02);'}">${screen.description || ''}</textarea>
                   </div>
                 </div>
               </div>
@@ -1892,11 +2207,11 @@
                   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
                     <div class="details-row">
                       <div class="details-label">Jira Link</div>
-                      <input type="text" placeholder="Jira URL..." value="${screen.jiraUrl || ''}" onblur="updateItemJira('${screen.id}', this.value)" style="width:100%; padding:4px 8px; border-radius:4px; border:1px solid var(--card-border); background:var(--sidebar-bg); color:var(--text-main); font-size:11px; outline:none;">
+                      <input type="text" placeholder="Jira URL..." value="${screen.jiraUrl || ''}" onblur="updateItemJira('${screen.id}', this.value)" ${isEditMode ? '' : 'readonly'} style="width:100%; padding:4px 8px; border-radius:4px; border:1px solid var(--card-border); background:${isEditMode ? 'var(--sidebar-bg)' : 'var(--item-hover)'}; color:var(--text-main); font-size:11px; outline:none; ${isEditMode ? '' : 'cursor: default;'}">
                     </div>
                     <div class="details-row">
                       <div class="details-label">Web URL</div>
-                      <input type="text" placeholder="Actual URL..." value="${screen.actualUrl || ''}" onblur="updateItemActualUrl('${screen.id}', this.value)" style="width:100%; padding:4px 8px; border-radius:4px; border:1px solid var(--card-border); background:var(--sidebar-bg); color:var(--text-main); font-size:11px; outline:none;">
+                      <input type="text" placeholder="Actual URL..." value="${screen.actualUrl || ''}" onblur="updateItemActualUrl('${screen.id}', this.value)" ${isEditMode ? '' : 'readonly'} style="width:100%; padding:4px 8px; border-radius:4px; border:1px solid var(--card-border); background:${isEditMode ? 'var(--sidebar-bg)' : 'var(--item-hover)'}; color:var(--text-main); font-size:11px; outline:none; ${isEditMode ? '' : 'cursor: default;'}">
                     </div>
                   </div>
 
@@ -1912,7 +2227,7 @@
                         Đã lưu
                       </span>
                     </div>
-                    <textarea class="desc-textarea" placeholder="Nhập mô tả..." onblur="updateItemDescription('${screen.id}', this.value)">${screen.description || ''}</textarea>
+                    <textarea class="desc-textarea" placeholder="Nhập mô tả..." onblur="updateItemDescription('${screen.id}', this.value)" ${isEditMode ? '' : 'readonly'} style="${isEditMode ? '' : 'cursor: default; background: rgba(0,0,0,0.02);'}">${screen.description || ''}</textarea>
                   </div>
                 </div>
               `;
@@ -1944,11 +2259,11 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                       <div class="details-row">
                         <div class="details-label">Jira Link</div>
-                        <input type="text" placeholder="Jira URL..." value="${screen.jiraUrl || ''}" onblur="updateItemJira('${screen.id}', this.value)" style="width:100%; padding:4px 8px; border-radius:4px; border:1px solid var(--card-border); background:var(--sidebar-bg); color:var(--text-main); font-size:11px; outline:none;">
+                        <input type="text" placeholder="Jira URL..." value="${screen.jiraUrl || ''}" onblur="updateItemJira('${screen.id}', this.value)" ${isEditMode ? '' : 'readonly'} style="width:100%; padding:4px 8px; border-radius:4px; border:1px solid var(--card-border); background:${isEditMode ? 'var(--sidebar-bg)' : 'var(--item-hover)'}; color:var(--text-main); font-size:11px; outline:none; ${isEditMode ? '' : 'cursor: default;'}">
                       </div>
                       <div class="details-row">
                         <div class="details-label">Web URL</div>
-                        <input type="text" placeholder="Actual URL..." value="${screen.actualUrl || ''}" onblur="updateItemActualUrl('${screen.id}', this.value)" style="width:100%; padding:4px 8px; border-radius:4px; border:1px solid var(--card-border); background:var(--sidebar-bg); color:var(--text-main); font-size:11px; outline:none;">
+                        <input type="text" placeholder="Actual URL..." value="${screen.actualUrl || ''}" onblur="updateItemActualUrl('${screen.id}', this.value)" ${isEditMode ? '' : 'readonly'} style="width:100%; padding:4px 8px; border-radius:4px; border:1px solid var(--card-border); background:${isEditMode ? 'var(--sidebar-bg)' : 'var(--item-hover)'}; color:var(--text-main); font-size:11px; outline:none; ${isEditMode ? '' : 'cursor: default;'}">
                       </div>
                     </div>
 
@@ -1965,7 +2280,7 @@
                           Đã lưu
                         </span>
                       </div>
-                      <textarea class="desc-textarea" placeholder="Ghi chú logic xử lý..." onblur="updateItemDescription('${screen.id}', this.value)">${screen.description || ''}</textarea>
+                      <textarea class="desc-textarea" placeholder="Ghi chú logic xử lý..." onblur="updateItemDescription('${screen.id}', this.value)" ${isEditMode ? '' : 'readonly'} style="${isEditMode ? '' : 'cursor: default; background: rgba(0,0,0,0.02);'}">${screen.description || ''}</textarea>
                     </div>
                   </div>
                 `;
@@ -2823,12 +3138,17 @@
 
     // Tab Screens
     function renderScreensAdmin(container) {
-      const tablesCheckboxHtml = tables.map(t => `
-        <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-main);">
-          <input type="checkbox" name="screen-tables" value="${t.id}">
-          ${t.id}
-        </label>
-      `).join('');
+      const currentScreen = activeEditScreenId ? screensMap[activeEditScreenId] : null;
+
+      const tablesCheckboxHtml = tables.map(t => {
+        const isChecked = currentScreen && currentScreen.tables && currentScreen.tables.includes(t.id);
+        return `
+          <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-main);">
+            <input type="checkbox" name="screen-tables" value="${t.id}" ${isChecked ? 'checked' : ''}>
+            ${t.id}
+          </label>
+        `;
+      }).join('');
 
       const allGroupsList = [];
       activeMenuStructure.forEach((modNode, mIdx) => {
@@ -2843,77 +3163,235 @@
         });
       });
 
+      let currentGroupKey = '';
+      if (activeEditScreenId) {
+        activeMenuStructure.forEach((modNode, mIdx) => {
+          modNode.items.forEach((grpNode, gIdx) => {
+            if (grpNode.items && grpNode.items.some(item => item.id === activeEditScreenId)) {
+              currentGroupKey = `${mIdx}-${gIdx}`;
+            }
+          });
+        });
+      }
+
       const groupSelectOptions = allGroupsList.map(g => `
-        <option value="${g.key}">[${g.moduleTitle}] ${g.groupTitle}</option>
+        <option value="${g.key}" ${g.key === currentGroupKey ? 'selected' : ''}>[${g.moduleTitle}] ${g.groupTitle}</option>
       `).join('');
 
-      const screensListHtml = Object.values(screensMap).map(scr => `
-        <div class="admin-list-card" style="margin-bottom:6px; padding:6px 12px;">
+      // Filter screen list by search query
+      const filteredScreens = Object.values(screensMap).filter(scr => {
+        const q = adminScreenQuery.trim().toLowerCase();
+        if (!q) return true;
+        return scr.id.toLowerCase().includes(q) || 
+               scr.name.toLowerCase().includes(q) || 
+               (scr.eduCode && scr.eduCode.toLowerCase().includes(q)) ||
+               (scr.tables && scr.tables.some(t => t.toLowerCase().includes(q)));
+      });
+
+      const screensListHtml = filteredScreens.map(scr => `
+        <div class="admin-list-card" style="margin-bottom:6px; padding:6px 12px; border: 1px solid ${scr.id === activeEditScreenId ? 'var(--accent-color)' : 'var(--card-border)'}; background: ${scr.id === activeEditScreenId ? 'rgba(99, 102, 241, 0.05)' : 'var(--card-bg)'};">
           <div style="font-size:12px;">
             <strong style="color:var(--text-main);">${scr.id}</strong> - ${scr.name}
             <div style="font-size:10px; color:var(--text-muted);">EDU: ${scr.eduCode || '-'} | DB: ${scr.tables.join(', ') || 'Không'}</div>
           </div>
-          <button class="admin-btn danger" style="padding:2px 6px; font-size:10px;" onclick="deleteScreenPrompt('${scr.id}')">Xóa</button>
+          <div style="display:flex; gap:6px;">
+            <button class="admin-btn secondary" style="padding:2px 6px; font-size:10px;" onclick="editScreenPrompt('${scr.id}')">Sửa</button>
+            <button class="admin-btn danger" style="padding:2px 6px; font-size:10px;" onclick="deleteScreenPrompt('${scr.id}')">Xóa</button>
+          </div>
         </div>
       `).join('');
 
-      container.innerHTML = `
-        <div class="admin-panel-title">Quản lý Màn hình (Screens)</div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; height: calc(100% - 40px); overflow:hidden;">
-          <div style="overflow-y:auto; padding-right:12px; display:flex; flex-direction:column; gap:16px; border-right:1px solid var(--card-border);">
-            <div>
-              <h4 style="font-size:11px; font-weight:700; margin-bottom:8px; color:var(--text-muted); text-transform:uppercase;">Thêm Nhóm Menu</h4>
-              <div class="admin-input-group" style="margin-bottom:8px;">
-                <label>Tên Nhóm (Ví dụ: Nhóm 1.6 - Thiết lập thi)</label>
-                <input type="text" id="new-group-title" class="admin-input" placeholder="Tên nhóm mới...">
+      // Left panel switches between ADD mode and EDIT mode
+      let leftPanelHtml = '';
+      if (activeEditScreenId && currentScreen) {
+        leftPanelHtml = `
+          <div style="border:1px solid var(--accent-color); padding:16px; border-radius:12px; background:rgba(99, 102, 241, 0.02);">
+            <h4 style="font-size:11px; font-weight:700; margin-bottom:12px; color:var(--accent-color); text-transform:uppercase;">✏️ Cập nhật Màn hình</h4>
+            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:12px;">
+              <div class="admin-input-group">
+                <label>Mã Màn hình (ID)</label>
+                <input type="text" id="edit-scr-id" class="admin-input" value="${currentScreen.id}" disabled style="opacity:0.6; cursor:not-allowed;">
               </div>
-              <button class="admin-btn secondary" style="width:100%;" onclick="addNewGroup()">Tạo nhóm mới</button>
+              <div class="admin-input-group">
+                <label>Chọn Nhóm Menu</label>
+                <select id="edit-screen-group-select" class="admin-input">
+                  ${groupSelectOptions || '<option value="">(Không có nhóm menu)</option>'}
+                </select>
+              </div>
+              <div class="admin-input-group">
+                <label>Tên Màn hình</label>
+                <input type="text" id="edit-scr-name" class="admin-input" placeholder="Tên màn hình..." value="${currentScreen.name}">
+              </div>
+              <div class="admin-input-group">
+                <label>Mã EDU cũ</label>
+                <input type="text" id="edit-scr-educode" class="admin-input" placeholder="Mã EDU..." value="${currentScreen.eduCode || '-'}">
+              </div>
+              <div class="admin-input-group">
+                <label>Bảng DB liên quan</label>
+                <div style="max-height:140px; overflow-y:auto; border:1px solid var(--card-border); padding:6px; border-radius:6px; background:var(--card-bg); display:flex; flex-direction:column; gap:4px;">
+                  ${tablesCheckboxHtml || '<div style="font-size:11px; color:var(--text-muted);">Không có bảng nào.</div>'}
+                </div>
+              </div>
             </div>
-            
-            <div style="border-top:1px solid var(--card-border); padding-top:16px;">
-              <h4 style="font-size:11px; font-weight:700; margin-bottom:8px; color:var(--text-muted); text-transform:uppercase;">Thêm Màn hình vào Nhóm</h4>
-              <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:12px;">
-                <div class="admin-input-group">
-                  <label>Chọn Nhóm</label>
-                  <select id="screen-group-select" class="admin-input">
-                    ${groupSelectOptions || '<option value="">(Không có nhóm menu)</option>'}
-                  </select>
-                </div>
-                <div class="admin-input-group">
-                  <label>Mã Màn hình (ID)</label>
-                  <input type="text" id="new-scr-id" class="admin-input" placeholder="Ví dụ: B.6.3.20">
-                </div>
-                <div class="admin-input-group">
-                  <label>Tên Màn hình</label>
-                  <input type="text" id="new-scr-name" class="admin-input" placeholder="Ví dụ: Thiết lập thi">
-                </div>
-                <div class="admin-input-group">
-                  <label>Mã EDU cũ</label>
-                  <input type="text" id="new-scr-educode" class="admin-input" placeholder="Ví dụ: E041005 (hoặc -)">
-                </div>
-                <div class="admin-input-group">
-                  <label>Bảng DB liên quan</label>
-                  <div style="max-height:90px; overflow-y:auto; border:1px solid var(--card-border); padding:6px; border-radius:6px; background:var(--card-bg); display:flex; flex-direction:column; gap:4px;">
-                    ${tablesCheckboxHtml || '<div style="font-size:11px; color:var(--text-muted);">Không có bảng nào.</div>'}
-                  </div>
-                </div>
-              </div>
-              <button class="admin-btn primary" style="width:100%;" onclick="addNewScreen()">Thêm màn hình</button>
+            <div style="display:flex; gap:8px;">
+              <button class="admin-btn primary" style="flex:1;" onclick="saveEditScreen()">Lưu Thay Đổi</button>
+              <button class="admin-btn secondary" style="flex:1;" onclick="cancelEditScreen()">Hủy</button>
             </div>
           </div>
-
-          <div style="overflow-y:auto; padding-right:4px; display:flex; flex-direction:column; gap:12px;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <h4 style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Danh sách màn hình</h4>
-              <span style="font-size:11px; color:var(--text-muted); font-weight:600;">${Object.keys(screensMap).length} Màn hình</span>
+        `;
+      } else {
+        leftPanelHtml = `
+          <div>
+            <h4 style="font-size:11px; font-weight:700; margin-bottom:8px; color:var(--text-muted); text-transform:uppercase;">Thêm Nhóm Menu</h4>
+            <div class="admin-input-group" style="margin-bottom:8px;">
+              <label>Tên Nhóm (Ví dụ: Nhóm 1.6 - Thiết lập thi)</label>
+              <input type="text" id="new-group-title" class="admin-input" placeholder="Tên nhóm mới...">
             </div>
-            <div style="max-height:420px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; padding-right:4px;">
-              ${screensListHtml || '<div style="color:var(--text-muted); font-size:12px;">Chưa có màn hình nào.</div>'}
+            <button class="admin-btn secondary" style="width:100%;" onclick="addNewGroup()">Tạo nhóm mới</button>
+          </div>
+          
+          <div style="border-top:1px solid var(--card-border); padding-top:16px;">
+            <h4 style="font-size:11px; font-weight:700; margin-bottom:8px; color:var(--text-muted); text-transform:uppercase;">Thêm Màn hình vào Nhóm</h4>
+            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:12px;">
+              <div class="admin-input-group">
+                <label>Chọn Nhóm</label>
+                <select id="screen-group-select" class="admin-input">
+                  ${groupSelectOptions || '<option value="">(Không có nhóm menu)</option>'}
+                </select>
+              </div>
+              <div class="admin-input-group">
+                <label>Mã Màn hình (ID)</label>
+                <input type="text" id="new-scr-id" class="admin-input" placeholder="Ví dụ: B.6.3.20">
+              </div>
+              <div class="admin-input-group">
+                <label>Tên Màn hình</label>
+                <input type="text" id="new-scr-name" class="admin-input" placeholder="Ví dụ: Thiết lập thi">
+              </div>
+              <div class="admin-input-group">
+                <label>Mã EDU cũ</label>
+                <input type="text" id="new-scr-educode" class="admin-input" placeholder="Ví dụ: E041005 (hoặc -)">
+              </div>
+              <div class="admin-input-group">
+                <label>Bảng DB liên quan</label>
+                <div style="max-height:90px; overflow-y:auto; border:1px solid var(--card-border); padding:6px; border-radius:6px; background:var(--card-bg); display:flex; flex-direction:column; gap:4px;">
+                  ${tablesCheckboxHtml || '<div style="font-size:11px; color:var(--text-muted);">Không có bảng nào.</div>'}
+                </div>
+              </div>
+            </div>
+            <button class="admin-btn primary" style="width:100%;" onclick="addNewScreen()">Thêm màn hình</button>
+          </div>
+        `;
+      }
+
+      container.innerHTML = `
+        <div class="admin-panel-title">Quản lý Màn hình (Screens)</div>
+        <div style="display:grid; grid-template-columns: 1.2fr 1.8fr; gap:20px; height: calc(100% - 40px); overflow:hidden;">
+          <!-- LEFT: Form inputs (add or edit) -->
+          <div style="overflow-y:auto; padding-right:12px; display:flex; flex-direction:column; gap:16px; border-right:1px solid var(--card-border);">
+            ${leftPanelHtml}
+          </div>
+
+          <!-- RIGHT: Screen List with search box -->
+          <div style="overflow-y:auto; padding-right:4px; display:flex; flex-direction:column; gap:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+              <h4 style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin:0;">Danh sách màn hình</h4>
+              <span style="font-size:11px; color:var(--text-muted); font-weight:600;">${filteredScreens.length}/${Object.keys(screensMap).length} Màn hình</span>
+            </div>
+            
+            <input type="text" id="admin-screen-search" class="admin-input" style="padding:6px; font-size:12px; margin-bottom:4px;" placeholder="Tìm nhanh màn hình (Tên, ID, bảng DB)..." oninput="filterAdminScreens(this.value)" value="${adminScreenQuery}">
+
+            <div style="max-height:380px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; padding-right:4px;">
+              ${screensListHtml || '<div style="color:var(--text-muted); font-size:12px;">Chưa có hoặc không tìm thấy màn hình nào.</div>'}
             </div>
           </div>
         </div>
       `;
     }
+
+    window.filterAdminScreens = function(val) {
+      adminScreenQuery = val;
+      renderAdminTabContent();
+      // Keep focus on the search input
+      const searchInput = document.getElementById('admin-screen-search');
+      if (searchInput) {
+        searchInput.focus();
+        const len = searchInput.value.length;
+        searchInput.setSelectionRange(len, len);
+      }
+    };
+
+    window.editScreenPrompt = function(screenId) {
+      activeEditScreenId = screenId;
+      renderAdminTabContent();
+    };
+
+    window.cancelEditScreen = function() {
+      activeEditScreenId = null;
+      renderAdminTabContent();
+    };
+
+    window.saveEditScreen = function() {
+      if (!activeEditScreenId) return;
+      const name = document.getElementById('edit-scr-name').value.trim();
+      const newGroupKey = document.getElementById('edit-screen-group-select').value;
+      const eduCode = document.getElementById('edit-scr-educode').value.trim() || '-';
+
+      if (!name) {
+        alert("Tên màn hình không được để trống!");
+        return;
+      }
+      if (!newGroupKey) {
+        alert("Vui lòng chọn nhóm menu cho màn hình!");
+        return;
+      }
+
+      const selectedTables = [];
+      document.querySelectorAll('input[name="screen-tables"]:checked').forEach(cb => {
+        selectedTables.push(cb.value);
+      });
+
+      const scr = screensMap[activeEditScreenId];
+      if (!scr) return;
+
+      // 1. Update information in screensMap
+      scr.name = name;
+      scr.eduCode = eduCode;
+      scr.tables = selectedTables;
+
+      // 2. Locate current position in activeMenuStructure and update or move
+      let oldGroupInfo = null;
+      activeMenuStructure.forEach((modNode, mIdx) => {
+        modNode.items.forEach((grpNode, gIdx) => {
+          if (grpNode.items && grpNode.items.some(item => item.id === activeEditScreenId)) {
+            oldGroupInfo = { mIdx, gIdx };
+          }
+        });
+      });
+
+      const targetParts = newGroupKey.split('-');
+      const newMIdx = parseInt(targetParts[0]);
+      const newGIdx = parseInt(targetParts[1]);
+
+      if (oldGroupInfo) {
+        // Remove from old group list
+        activeMenuStructure[oldGroupInfo.mIdx].items[oldGroupInfo.gIdx].items = 
+          activeMenuStructure[oldGroupInfo.mIdx].items[oldGroupInfo.gIdx].items.filter(item => item.id !== activeEditScreenId);
+      }
+
+      // Add to new group list
+      if (!activeMenuStructure[newMIdx].items[newGIdx].items) {
+        activeMenuStructure[newMIdx].items[newGIdx].items = [];
+      }
+      activeMenuStructure[newMIdx].items[newGIdx].items.push({ id: activeEditScreenId, name: name });
+
+      // 3. Save and close edit view
+      saveMenuStructure();
+      saveProgress(activeEditScreenId);
+
+      activeEditScreenId = null;
+      renderAdminTabContent();
+      showToast("Cập nhật thông tin màn hình thành công!");
+    };
 
     window.addNewGroup = function() {
       const title = document.getElementById('new-group-title').value.trim();
@@ -2959,6 +3437,7 @@
         alert("Mã màn hình này đã tồn tại trong phân hệ!");
         return;
       }
+
 
       const selectedTables = [];
       document.querySelectorAll('input[name="screen-tables"]:checked').forEach(cb => {
@@ -3250,7 +3729,18 @@
             <div>
               <span class="table-badge badge-${t.group}" style="font-size:9px; font-weight:700; text-transform:uppercase; padding:2px 6px; border-radius:4px;">${t.group}</span>
               <h3 style="font-family:monospace; font-size:16px; margin:4px 0 2px 0; color:var(--text-main);">${t.id}</h3>
-              <p style="font-size:12px; color:var(--text-muted); margin:0;">${t.title}</p>
+              <p style="font-size:12px; color:var(--text-muted); margin:0 0 8px 0;">${t.title}</p>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <label style="font-size:11px; color:var(--text-muted); font-weight:600;">Nhóm sơ đồ:</label>
+                <select onchange="updateTableGroup('${t.id}', this.value)" style="padding:4px; font-size:11px; border-radius:6px; background:var(--sidebar-bg); color:var(--text-main); border:1px solid var(--card-border);">
+                  <option value="general" ${t.group === 'general' ? 'selected' : ''}>Chung (Master)</option>
+                  <option value="majors" ${t.group === 'majors' ? 'selected' : ''}>Ngành / Khóa</option>
+                  <option value="subjects" ${t.group === 'subjects' ? 'selected' : ''}>Môn học / ĐK</option>
+                  <option value="curriculum" ${t.group === 'curriculum' ? 'selected' : ''}>Khung CTK</option>
+                  <option value="classes" ${t.group === 'classes' ? 'selected' : ''}>Lớp & Phân môn</option>
+                  <option value="schedule" ${t.group === 'schedule' ? 'selected' : ''}>Lịch / Giảng dạy</option>
+                </select>
+              </div>
             </div>
             <div style="display:flex; gap:8px;">
               <button class="admin-btn secondary" style="padding:4px 10px; font-size:11px;" onclick="hideSchemaEditor()">Đóng</button>
@@ -3464,6 +3954,15 @@
       renderContent();
     }
 
+    window.updateTableGroup = function(tableId, newGroup) {
+      const t = tables.find(tbl => tbl.id === tableId);
+      if (!t) return;
+      t.group = newGroup;
+      saveTableSchemaToCloud(t);
+      renderAdminTabContent();
+      showToast(`Đã cập nhật nhóm cho bảng ${tableId} thành công!`);
+    };
+
     window.syncSqlSchemaFromJSON = async function() {
       if (confirm("Bạn có chắc chắn muốn đồng bộ toàn bộ 37 bảng từ file SQL Schema cấu trúc mới lên Firebase Firestore? Hành động này sẽ ghi đè các bảng trùng tên.")) {
         try {
@@ -3588,10 +4087,112 @@
       reader.readAsText(file);
     };
 
+    // =============================================
+    // LOCK/UNLOCK EDIT FEATURES CONFIG
+    // =============================================
+    function checkEditMode() {
+      const hostname = window.location.hostname;
+      const isLocal = hostname === 'localhost' || 
+                      hostname === '127.0.0.1' || 
+                      hostname.startsWith('192.168.') || 
+                      hostname.startsWith('172.');
+      const isUnlocked = localStorage.getItem('asc_admin_unlocked') === 'true';
+      isEditMode = isLocal || isUnlocked;
+      
+      updateLockStatusUI();
+    }
+
+    function updateLockStatusUI() {
+      const lockBtn = document.getElementById('lock-toggle-btn');
+      if (lockBtn) {
+        const hostname = window.location.hostname;
+        const isLocal = hostname === 'localhost' || 
+                        hostname === '127.0.0.1' || 
+                        hostname.startsWith('192.168.') || 
+                        hostname.startsWith('172.');
+        
+        if (isLocal) {
+          lockBtn.style.display = 'none';
+        } else {
+          lockBtn.style.display = 'flex';
+          if (isEditMode) {
+            lockBtn.innerHTML = `
+              <svg class="icon-svg" viewBox="0 0 24 24" style="fill:#ef4444; width:16px; height:16px; margin-right:4px;"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+              <span class="btn-text-label">Khóa Cấu Hình</span>
+            `;
+            lockBtn.title = "Bấm để khóa lại chế độ Chỉ Xem";
+          } else {
+            lockBtn.innerHTML = `
+              <svg class="icon-svg" viewBox="0 0 24 24" style="fill:#10b981; width:16px; height:16px; margin-right:4px;"><path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6h1.9c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm0 12H6V10h12v10z"/></svg>
+              <span class="btn-text-label">Mở Khóa</span>
+            `;
+            lockBtn.title = "Nhập mật mã để chỉnh sửa cấu hình";
+          }
+        }
+      }
+      
+      const adminBtn = document.getElementById('admin-settings-btn');
+      const importBtn = document.getElementById('import-btn');
+      const resetBtn = document.getElementById('reset-btn');
+      
+      if (adminBtn) adminBtn.style.display = isEditMode ? 'flex' : 'none';
+      if (importBtn) importBtn.style.display = isEditMode ? 'flex' : 'none';
+      if (resetBtn) resetBtn.style.display = isEditMode ? 'flex' : 'none';
+    }
+
+    window.toggleLockMode = function() {
+      if (isEditMode) {
+        localStorage.removeItem('asc_admin_unlocked');
+        showToast("Đã khóa lại chế độ chỉ xem!");
+        setTimeout(() => location.reload(), 600);
+      } else {
+        const pass = prompt("Nhập mật mã để mở khóa các tính năng cấu hình:");
+        if (pass === 'minhchau@2026') {
+          localStorage.setItem('asc_admin_unlocked', 'true');
+          showToast("Mở khóa cấu hình thành công!");
+          setTimeout(() => location.reload(), 600);
+        } else if (pass !== null) {
+          alert("Mật mã không đúng!");
+        }
+      }
+    };
+
     // INITIALIZATION
     window.onload = () => {
+      checkEditMode();
       fetchFirebaseConfig();
     };
+
+    // =============================================
+    // MOBILE SIDEBAR TOGGLE
+    // =============================================
+    function toggleMobileSidebar() {
+      const sidebar = document.querySelector('aside');
+      const overlay = document.getElementById('mobile-overlay');
+      const isOpen = sidebar.classList.contains('mobile-open');
+      if (isOpen) {
+        closeMobileSidebar();
+      } else {
+        sidebar.classList.add('mobile-open');
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    function closeMobileSidebar() {
+      const sidebar = document.querySelector('aside');
+      const overlay = document.getElementById('mobile-overlay');
+      sidebar.classList.remove('mobile-open');
+      overlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    // Đóng sidebar khi resize về desktop
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 768) {
+        closeMobileSidebar();
+      }
+    });
   </script>
 
   <!-- ADMIN SETTINGS MODAL -->

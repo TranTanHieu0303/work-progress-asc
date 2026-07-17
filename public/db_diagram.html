@@ -498,15 +498,220 @@
       gap: 6px;
       font-weight: 500;
     }
+
+    /* =============================================
+       RESPONSIVE - HAMBURGER BUTTON
+    ============================================= */
+    .mobile-menu-btn {
+      display: none;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      justify-content: center;
+      align-items: center;
+      background: var(--btn-bg);
+      border: 1px solid var(--btn-border);
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--text-color);
+      flex-shrink: 0;
+    }
+    .mobile-menu-btn:hover {
+      background: var(--btn-active);
+    }
+    .mobile-menu-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    /* Mobile overlay */
+    .mobile-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(2px);
+      z-index: 5;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .mobile-overlay.active {
+      display: block;
+      opacity: 1;
+    }
+
+    /* =============================================
+       TABLET: 769px – 1024px
+    ============================================= */
+    @media (max-width: 1024px) and (min-width: 769px) {
+      #sidebar {
+        width: 260px;
+      }
+      .sidebar-header h1 {
+        font-size: 16px;
+      }
+    }
+
+    /* =============================================
+       MOBILE: ≤ 768px
+    ============================================= */
+    @media (max-width: 768px) {
+
+      /* Layout: sidebar và stage stack theo chiều dọc */
+      body {
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      /* Hamburger hiện trên mobile */
+      .mobile-menu-btn {
+        display: flex;
+      }
+
+      /* Sidebar: fixed slide-in từ trái */
+      #sidebar {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 85vw;
+        max-width: 320px;
+        height: 100vh;
+        z-index: 10;
+        transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25);
+      }
+      #sidebar.mobile-open {
+        left: 0;
+      }
+
+      /* Sidebar header: tích hợp hamburger */
+      .sidebar-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .sidebar-header-text h1 {
+        font-size: 16px;
+        margin-bottom: 2px;
+      }
+
+      /* Stage container chiếm toàn bộ */
+      #stage-container {
+        flex: 1;
+        height: 100vh;
+      }
+
+      /* Top banner: gọn hơn, wrap */
+      .top-banner {
+        top: 12px;
+        right: 12px;
+        left: 12px;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 8px 12px;
+        font-size: 11px;
+      }
+      /* Ẩn hướng dẫn chuột (dài) trên mobile */
+      .top-banner .mouse-hint {
+        display: none;
+      }
+      /* Thay bằng hướng dẫn touch */
+      .top-banner .touch-hint {
+        display: flex;
+      }
+
+      /* Filter grid giữ 2 cột */
+      .filter-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .filter-btn {
+        font-size: 10px;
+        padding: 5px 6px;
+      }
+
+      /* Modal chi tiết bảng */
+      .modal-card {
+        width: 90vw !important;
+        max-height: 85vh !important;
+      }
+
+      /* Footer actions */
+      .sidebar-footer {
+        padding: 10px 14px;
+      }
+      .action-btn {
+        padding: 5px 8px;
+        font-size: 11px;
+      }
+    }
+
+    /* Hamburger float button khi sidebar ẩn (mobile) */
+    .sidebar-float-toggle {
+      display: none;
+    }
+    @media (max-width: 768px) {
+      .sidebar-float-toggle {
+        display: flex;
+        position: fixed;
+        top: 12px;
+        left: 12px;
+        z-index: 20;
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: var(--sidebar-bg);
+        border: 1px solid var(--sidebar-border);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: var(--text-color);
+        transition: background 0.2s ease;
+      }
+      .sidebar-float-toggle:hover {
+        background: var(--btn-active);
+      }
+      .sidebar-float-toggle svg {
+        width: 18px;
+        height: 18px;
+        fill: currentColor;
+      }
+      /* Ẩn float button khi sidebar mở */
+      #sidebar.mobile-open ~ .sidebar-float-toggle,
+      #sidebar.mobile-open + * .sidebar-float-toggle {
+        display: none;
+      }
+    }
+
+    /* Touch hint (chỉ hiện trên mobile) */
+    .touch-hint {
+      display: none;
+    }
   </style>
 </head>
 <body>
 
+  <!-- MOBILE SIDEBAR OVERLAY -->
+  <div class="mobile-overlay" id="mobile-overlay" onclick="closeMobileSidebar()"></div>
+
+  <!-- FLOAT HAMBURGER BUTTON (mobile, hiện khi sidebar đóng) -->
+  <button class="sidebar-float-toggle" id="sidebar-float-toggle" onclick="toggleMobileSidebar()" title="Mở menu">
+    <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+  </button>
+
   <!-- SIDEBAR PANEL -->
   <div id="sidebar">
     <div class="sidebar-header">
-      <h1>Cơ sở Dữ liệu</h1>
-      <p>QL Chương trình Đào tạo</p>
+      <div class="sidebar-header-text">
+        <h1>Cơ sở Dữ liệu</h1>
+        <p>QL Chương trình Đào tạo</p>
+      </div>
+      <!-- Nút đóng sidebar trên mobile -->
+      <button class="mobile-menu-btn" onclick="closeMobileSidebar()" title="Đóng menu" style="margin-top:2px;">
+        <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </button>
     </div>
     
     <!-- Search Bar -->
@@ -552,7 +757,7 @@
       <div class="footer-actions" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:4px;">
         <button class="action-btn" onclick="resetZoom()">Reset</button>
         <button class="action-btn" onclick="fitToScreen()">Fit All</button>
-        <button class="action-btn" onclick="autoArrangeDiagram()" style="background:var(--accent-color); color:white; font-weight:600;" title="Tự động sắp xếp các bảng">Auto</button>
+        <button class="action-btn" id="auto-arrange-btn" onclick="autoArrangeDiagram()" style="background:var(--accent-color); color:white; font-weight:600;" title="Tự động sắp xếp các bảng">Auto</button>
       </div>
       <button class="theme-toggle-btn" id="theme-toggle" onclick="toggleTheme()" title="Chuyển chế độ Sáng/Tối">
         <!-- Moon Icon -->
@@ -569,9 +774,11 @@
       <a href="index.html" style="background:var(--accent-color); color:white; text-decoration:none; padding:6px 12px; border-radius:6px; font-weight:600; font-size:12px; display:inline-flex; align-items:center; gap:6px;">
         ← Trang chủ
       </a>
+      <button id="lock-toggle-btn" onclick="toggleLockMode()" style="display:none; padding:6px 12px; border-radius:6px; font-weight:600; font-size:12px; align-items:center; gap:6px; cursor:pointer; background:var(--btn-bg); border:1px solid var(--btn-border); color:var(--text-color);"></button>
       <span><span class="dot" style="background:#ef4444; width:10px; height:10px;"></span>Khóa Chính (PK)</span>
       <span><span class="dot" style="background:#3b82f6; width:10px; height:10px;"></span>Khóa Phụ (FK / Logic)</span>
-      <span>🖱️ Lăn chuột: Phóng to/Thu nhỏ | Giữ và kéo: Di chuyển sơ đồ hoặc các bảng</span>
+      <span class="mouse-hint">🖱️ Lăn chuột: Phóng to/Thu nhỏ | Giữ và kéo: Di chuyển sơ đồ hoặc các bảng</span>
+      <span class="touch-hint">👆 Chạm 2 ngón: Zoom | Giữ và kéo: Di chuyển</span>
     </div>
     
     <svg id="svg-canvas">
@@ -1186,6 +1393,7 @@
     let dragOffset = { x: 0, y: 0 };
     let isPanning = false;
     let panOffset = { x: 0, y: 0 };
+    let isEditMode = false;
     
     const svg = document.getElementById("svg-canvas");
     const svgRect = svg.getBoundingClientRect();
@@ -1313,7 +1521,7 @@
     // Panning & Dragging
     stage.addEventListener("mousedown", (e) => {
       const cardHeader = e.target.closest(".card-header");
-      if (cardHeader) {
+      if (cardHeader && isEditMode) {
         const card = cardHeader.closest(".table-card");
         const tableId = card.getAttribute("data-id");
         activeDragNode = tables.find(t => t.id === tableId);
@@ -1749,8 +1957,76 @@
       }
     }
 
+    // =============================================
+    // LOCK/UNLOCK EDIT FEATURES CONFIG
+    // =============================================
+    function checkEditMode() {
+      const hostname = window.location.hostname;
+      const isLocal = hostname === 'localhost' || 
+                      hostname === '127.0.0.1' || 
+                      hostname.startsWith('192.168.') || 
+                      hostname.startsWith('172.');
+      const isUnlocked = localStorage.getItem('asc_admin_unlocked') === 'true';
+      isEditMode = isLocal || isUnlocked;
+      
+      updateLockStatusUI();
+    }
+
+    function updateLockStatusUI() {
+      const lockBtn = document.getElementById('lock-toggle-btn');
+      if (lockBtn) {
+        const hostname = window.location.hostname;
+        const isLocal = hostname === 'localhost' || 
+                        hostname === '127.0.0.1' || 
+                        hostname.startsWith('192.168.') || 
+                        hostname.startsWith('172.');
+        
+        if (isLocal) {
+          lockBtn.style.display = 'none';
+        } else {
+          lockBtn.style.display = 'inline-flex';
+          if (isEditMode) {
+            lockBtn.innerHTML = `
+              <svg style="width:12px; height:12px; fill:#ef4444; margin-right:4px;" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+              <span>Khóa cấu hình</span>
+            `;
+            lockBtn.title = "Bấm để khóa lại chế độ Chỉ Xem";
+          } else {
+            lockBtn.innerHTML = `
+              <svg style="width:12px; height:12px; fill:#10b981; margin-right:4px;" viewBox="0 0 24 24"><path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6h1.9c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm0 12H6V10h12v10z"/></svg>
+              <span>Mở khóa</span>
+            `;
+            lockBtn.title = "Nhập mật mã để chỉnh sửa cấu hình";
+          }
+        }
+      }
+      
+      const autoBtn = document.getElementById('auto-arrange-btn');
+      if (autoBtn) {
+        autoBtn.style.display = isEditMode ? 'block' : 'none';
+      }
+    }
+
+    window.toggleLockMode = function() {
+      if (isEditMode) {
+        localStorage.removeItem('asc_admin_unlocked');
+        alert("Đã khóa lại chế độ chỉ xem!");
+        location.reload();
+      } else {
+        const pass = prompt("Nhập mật mã để mở khóa các tính năng cấu hình:");
+        if (pass === 'minhchau@2026') {
+          localStorage.setItem('asc_admin_unlocked', 'true');
+          alert("Mở khóa cấu hình thành công!");
+          location.reload();
+        } else if (pass !== null) {
+          alert("Mật mã không đúng!");
+        }
+      }
+    };
+
     // INITIALIZATION
     window.onload = async () => {
+      checkEditMode();
       // First initialize Firebase if configured
       await initFirebase();
 
@@ -1819,6 +2095,10 @@
     };
 
     window.autoArrangeDiagram = async function() {
+      if (!isEditMode) {
+        alert("Vui lòng mở khóa cấu hình để tự động sắp xếp!");
+        return;
+      }
       if (!confirm("Bạn có muốn tự động sắp xếp lại vị trí các bảng theo Nhóm chức năng để tránh chồng chéo? Vị trí mới sẽ được lưu lại.")) {
         return;
       }
@@ -1886,6 +2166,37 @@
         fitToScreen();
       }, 100);
     };
+
+    // =============================================
+    // MOBILE SIDEBAR TOGGLE
+    // =============================================
+    function toggleMobileSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('mobile-overlay');
+      const floatBtn = document.getElementById('sidebar-float-toggle');
+      sidebar.classList.add('mobile-open');
+      overlay.classList.add('active');
+      if (floatBtn) floatBtn.style.display = 'none';
+    }
+
+    function closeMobileSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('mobile-overlay');
+      const floatBtn = document.getElementById('sidebar-float-toggle');
+      sidebar.classList.remove('mobile-open');
+      overlay.classList.remove('active');
+      if (floatBtn && window.innerWidth <= 768) floatBtn.style.display = 'flex';
+    }
+
+    // Đóng sidebar khi resize về desktop
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 768) {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('mobile-overlay');
+        sidebar.classList.remove('mobile-open');
+        overlay.classList.remove('active');
+      }
+    });
   </script>
 </body>
 </html>
