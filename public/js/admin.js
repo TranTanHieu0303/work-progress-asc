@@ -565,7 +565,8 @@ function renderDatabaseAdmin(container) {
     <div class="admin-panel-title" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
       <span>Quản lý Bảng Cơ sở dữ liệu (Tables & Schema)</span>
       <div style="display:flex; gap:8px;">
-        <button class="admin-btn primary" style="padding:4px 10px; font-size:11px;" onclick="exportTableSchemaJSON()" title="Xuất cấu trúc bảng ra file JSON">📤 Export Schema</button>
+        <button class="admin-btn primary" style="padding:4px 10px; font-size:11px;" onclick="openSqlScriptModal()" title="Thêm / Sửa Table nhanh bằng script SQL">📝 Nhập Script SQL</button>
+        <button class="admin-btn secondary" style="padding:4px 10px; font-size:11px;" onclick="exportTableSchemaJSON()" title="Xuất cấu trúc bảng ra file JSON">📤 Export Schema</button>
         <button class="admin-btn secondary" style="padding:4px 10px; font-size:11px;" onclick="triggerImportTableSchema()" title="Nhập cấu trúc bảng từ file JSON">📥 Import Schema</button>
         <button class="admin-btn primary" style="padding:4px 10px; font-size:11px;display: none;" onclick="syncSqlSchemaFromJSON()">⚡ Đồng bộ SQL Schema</button>
         <input type="file" id="import-schema-file-input" style="display:none;" accept=".json" onchange="importTableSchemaJSON(event)">
@@ -1652,4 +1653,97 @@ window.saveNoteEditorContent = function () {
   }
 
   closeNoteEditorModal();
+};
+
+// =============================================
+// FAST SQL SCRIPT IMPORT / UPDATE MODAL
+// =============================================
+window.openSqlScriptModal = function () {
+  let modal = document.getElementById('sql-script-import-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'sql-script-import-modal';
+    modal.style.cssText = 'display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.6); z-index:99999; justify-content:center; align-items:center; backdrop-filter:blur(4px);';
+    modal.innerHTML = `
+      <div style="background:var(--sidebar-bg, #111827); border:1px solid var(--sidebar-border, #1f2937); border-radius:12px; width:720px; max-width:92vw; max-height:85vh; display:flex; flex-direction:column; box-shadow:0 20px 40px rgba(0,0,0,0.4); overflow:hidden;">
+        <div style="padding:16px 20px; border-bottom:1px solid var(--sidebar-border, #1f2937); display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.03);">
+          <div>
+            <h3 style="margin:0; font-size:16px; color:var(--text-color, #f9fafb); font-weight:700;">📝 Thêm / Cập nhật Table bằng Script SQL</h3>
+            <p style="margin:2px 0 0 0; font-size:12px; color:var(--text-muted, #9ca3af);">Nhập script DDL (CREATE TABLE, ALTER TABLE ADD CONSTRAINT PK/FK...)</p>
+          </div>
+          <button onclick="closeSqlScriptModal()" style="border:none; background:transparent; font-size:24px; cursor:pointer; color:var(--text-muted, #9ca3af);">&times;</button>
+        </div>
+        <div style="padding:20px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:12px;">
+          <div style="font-size:11px; color:var(--text-muted, #9ca3af); background:rgba(99,102,241,0.08); border:1px solid rgba(99,102,241,0.2); padding:10px; border-radius:6px; line-height:1.5;">
+            💡 <strong>Hướng dẫn:</strong> Dán đoạn SQL script (hỗ trợ T-SQL / Standard SQL). Hệ thống sẽ tự phân tích Tên bảng, Danh sách Cột, Kiểu dữ liệu, Khóa chính (PK) và Khóa ngoại (FK). <em>Nếu bảng đã có thì tự động cập nhật, nếu chưa có sẽ tạo mới.</em>
+          </div>
+          <textarea id="sql-script-textarea" style="width:100%; height:280px; background:var(--input-bg, #1f2937); border:1px solid var(--input-border, #374151); color:var(--text-color, #f9fafb); font-family:Consolas, Monaco, monospace; font-size:12px; padding:12px; border-radius:8px; resize:vertical; outline:none;" placeholder="Dán đoạn script CREATE TABLE / ALTER TABLE vào đây..."></textarea>
+        </div>
+        <div style="padding:16px 20px; border-top:1px solid var(--sidebar-border, #1f2937); display:flex; justify-content:flex-end; gap:10px; background:rgba(0,0,0,0.03);">
+          <button class="admin-btn secondary" style="padding:6px 14px; font-size:12px;" onclick="closeSqlScriptModal()">Hủy</button>
+          <button class="admin-btn primary" style="padding:6px 16px; font-size:12px; font-weight:600;" onclick="executeImportSqlScript()">⚡ Phân tích & Cập nhật</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+  modal.style.display = 'flex';
+};
+
+window.closeSqlScriptModal = function () {
+  const modal = document.getElementById('sql-script-import-modal');
+  if (modal) modal.style.display = 'none';
+};
+
+window.executeImportSqlScript = function () {
+  const textarea = document.getElementById('sql-script-textarea');
+  if (!textarea) return;
+
+  const scriptText = textarea.value;
+  if (!scriptText || !scriptText.trim()) {
+    alert("Vui lòng nhập đoạn script SQL (CREATE TABLE / ALTER TABLE)!");
+    return;
+  }
+
+  if (typeof window.SqlParser === 'undefined' || !window.SqlParser.parseSqlScript) {
+    alert("Lỗi: Thư viện SqlParser chưa sẵn sàng!");
+    return;
+  }
+
+  try {
+    const parseResult = window.SqlParser.parseSqlScript(scriptText, tables);
+    tables = parseResult.tables;
+
+    // Persist updated tables
+    if (isFirebaseEnabled && firestoreDb) {
+      const batch = firestoreDb.batch();
+      tables.forEach(t => {
+        const docRef = firestoreDb.collection('tables').doc(t.id);
+        batch.set(docRef, {
+          tableId: t.id,
+          tableName: t.title || t.id,
+          group: t.group || 'general',
+          x: t.x !== undefined ? t.x : 150,
+          y: t.y !== undefined ? t.y : 150,
+          columns: t.columns || [],
+          relations: t.relations || []
+        });
+      });
+      batch.commit().then(() => {
+        console.log("SQL parsed tables saved to Cloud Firestore!");
+      }).catch(err => {
+        console.error("Error saving SQL parsed tables to Firestore:", err);
+      });
+    } else {
+      localStorage.setItem(STORAGE_KEY + '_tables_schema', JSON.stringify(tables));
+    }
+
+    renderAdminTabContent();
+    closeSqlScriptModal();
+    if (typeof renderContent === 'function') renderContent();
+    showToast(`Đã phân tích SQL thành công: Tạo mới ${parseResult.summary.created} bảng, cập nhật ${parseResult.summary.updated} bảng!`);
+  } catch (err) {
+    console.error("Failed to parse SQL script:", err);
+    alert("Lỗi khi phân tích SQL script: " + err.message);
+  }
 };
