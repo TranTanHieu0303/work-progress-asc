@@ -10,6 +10,10 @@
   <script src="firebase_config.js"></script>
   <script src="sql_tables_schema.js"></script>
 
+  <!-- Quill CSS & JS (Rich Text Editor) -->
+  <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+
   <!-- Google Fonts: Inter & Outfit -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -52,37 +56,55 @@
       --scrollbar-thumb: #cbd5e1;
     }
 
+    /* =====================================================
+       DARK MODE — "Dim" style (dễ nhìn hơn, ít tương phản)
+       Phiên bản cũ (tối hơn) được giữ lại bên dưới dạng comment
+       để có thể khôi phục bất cứ lúc nào.
+
+       PHIÊN BẢN CŨ (gốc — rất tối):
+         --bg-gradient: radial-gradient(circle at top left, #0f172a 0%, #020617 100%);
+         --card-bg: rgba(30, 41, 59, 0.7);
+         --card-border: rgba(255, 255, 255, 0.06);
+         --text-main: #f8fafc;
+         --text-muted: #94a3b8;
+         --sidebar-bg: rgba(15, 23, 42, 0.9);
+         --sidebar-border: rgba(255, 255, 255, 0.06);
+         --item-hover: rgba(255, 255, 255, 0.03);
+         --glass-bg: rgba(15, 23, 42, 0.6);
+         --glass-border: rgba(255, 255, 255, 0.05);
+         --scrollbar-thumb: #334155;
+    ===================================================== */
     html.dark {
-      --bg-gradient: radial-gradient(circle at top left, #0f172a 0%, #020617 100%);
-      --card-bg: rgba(30, 41, 59, 0.7);
-      --card-border: rgba(255, 255, 255, 0.06);
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
+      --bg-gradient: linear-gradient(135deg, #1e2433 0%, #1a1f2e 100%);
+      --card-bg: rgba(37, 47, 70, 0.92);
+      --card-border: rgba(255, 255, 255, 0.10);
+      --text-main: #e2e8f0;
+      --text-muted: #9eacbf;
       --accent-color: #6366f1;
       --accent-hover: #4f46e5;
-      --accent-light: rgba(99, 102, 241, 0.15);
-      --sidebar-bg: rgba(15, 23, 42, 0.9);
-      --sidebar-border: rgba(255, 255, 255, 0.06);
-      --item-hover: rgba(255, 255, 255, 0.03);
+      --accent-light: rgba(99, 102, 241, 0.18);
+      --sidebar-bg: rgba(25, 32, 50, 0.97);
+      --sidebar-border: rgba(255, 255, 255, 0.09);
+      --item-hover: rgba(255, 255, 255, 0.06);
 
-      --status-todo-bg: rgba(148, 163, 184, 0.1);
+      --status-todo-bg: rgba(148, 163, 184, 0.12);
       --status-todo-text: #94a3b8;
       --status-todo-border: rgba(148, 163, 184, 0.3);
 
-      --status-progress-bg: rgba(217, 119, 6, 0.15);
+      --status-progress-bg: rgba(217, 119, 6, 0.18);
       --status-progress-text: #fbbf24;
       --status-progress-border: rgba(251, 191, 36, 0.3);
 
-      --status-done-bg: rgba(16, 185, 129, 0.15);
+      --status-done-bg: rgba(16, 185, 129, 0.18);
       --status-done-text: #34d399;
       --status-done-border: rgba(52, 211, 153, 0.3);
 
-      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
-      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
-      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
-      --glass-bg: rgba(15, 23, 42, 0.6);
-      --glass-border: rgba(255, 255, 255, 0.05);
-      --scrollbar-thumb: #334155;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.25), 0 2px 4px -2px rgba(0, 0, 0, 0.25);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.35), 0 4px 6px -4px rgba(0, 0, 0, 0.35);
+      --glass-bg: rgba(30, 40, 65, 0.78);
+      --glass-border: rgba(255, 255, 255, 0.10);
+      --scrollbar-thumb: #404f6d;
     }
 
     * {
@@ -1524,6 +1546,87 @@
         padding: 6px 7px;
       }
     }
+
+    /* RICH TEXT NOTES PREVIEW & EDITOR STYLE */
+    .note-preview-box {
+      border: 1px solid var(--card-border);
+      padding: 8px 12px;
+      border-radius: 6px;
+      background: var(--bg-gradient);
+      min-height: 48px;
+      max-height: 100px;
+      overflow-y: auto;
+      font-size: 13px;
+      color: var(--text-main);
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+
+    .note-preview-box.ql-editor {
+      padding: 8px 12px;
+    }
+
+    .note-preview-box a,
+    .ql-editor a {
+      color: var(--accent-color);
+      text-decoration: underline;
+    }
+
+    .note-preview-box p,
+    .ql-editor p {
+      margin: 0 0 6px 0;
+    }
+
+    .note-preview-box p:last-child,
+    .ql-editor p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Dark mode adjustments for Quill */
+    .dark .ql-toolbar.ql-snow {
+      border-color: var(--card-border);
+      background: var(--bg-gradient);
+      border-top-left-radius: 6px;
+      border-top-right-radius: 6px;
+    }
+
+    .dark .ql-container.ql-snow {
+      border-color: var(--card-border);
+      background: var(--card-bg);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: var(--text-main);
+      border-bottom-left-radius: 6px;
+      border-bottom-right-radius: 6px;
+    }
+
+    .dark .ql-snow .ql-stroke {
+      stroke: var(--text-main);
+    }
+
+    .dark .ql-snow .ql-fill {
+      fill: var(--text-main);
+    }
+
+    .dark .ql-snow .ql-picker {
+      color: var(--text-main);
+    }
+
+    .dark .ql-snow .ql-picker-options {
+      background-color: var(--card-bg);
+      border-color: var(--card-border);
+    }
+
+    #note-quill-editor {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    #note-quill-editor .ql-container {
+      flex: 1;
+      overflow-y: auto;
+      min-height: 150px;
+    }
   </style>
 </head>
 
@@ -1636,6 +1739,16 @@
         <div class="progress-bar-container">
           <div class="progress-bar-fill" id="global-progress-bar"></div>
         </div>
+        <!-- Weighted progress (theo độ khó) -->
+        <div class="progress-header" style="margin-top: 10px; margin-bottom: 4px;">
+          <h4 style="font-size: 11px; font-weight: 500; color: var(--text-muted); margin: 0;">Tiến độ theo độ khó</h4>
+          <span id="global-weighted-progress-pct"
+            style="font-size: 12px; font-weight: 700; color: var(--accent-color);">0%</span>
+        </div>
+        <div class="progress-bar-container" style="height: 5px; margin-bottom: 12px; opacity: 0.85;">
+          <div class="progress-bar-fill" id="global-weighted-progress-bar"
+            style="background: linear-gradient(90deg, #3b82f6 0%, #818cf8 100%);"></div>
+        </div>
         <div class="progress-stats-grid">
           <div class="stat-box">
             <span class="stat-num" id="stat-total">0</span>
@@ -1649,6 +1762,18 @@
             <span class="stat-num" id="stat-done">0</span>
             <span class="stat-label">Xong</span>
           </div>
+        </div>
+
+        <!-- THỐNG KÊ CHI TIẾT THEO ĐỘ KHÓ -->
+        <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--card-border);">
+          <button id="diff-stats-toggle" onclick="toggleDiffStats()"
+            style="width:100%; display:flex; justify-content:space-between; align-items:center; background:none; border:none; cursor:pointer; padding:0; color:var(--text-muted); margin-bottom:0;">
+            <span style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Thống kê theo độ khó</span>
+            <svg id="diff-stats-chevron" style="width:14px; height:14px; fill:currentColor; transform:rotate(0deg); transition:transform 0.2s ease; flex-shrink:0;" viewBox="0 0 24 24">
+              <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+            </svg>
+          </button>
+          <div id="difficulty-stats-list" style="display:none; flex-direction:column; gap:4px; margin-top:8px;"></div>
         </div>
       </div>
 
@@ -1666,8 +1791,28 @@
 
       <!-- FILTER STATUS -->
       <div>
-        <div class="sidebar-section-title">Lọc theo trạng thái</div>
-        <div class="filter-chips" id="status-filter-container">
+        <button onclick="toggleSidebarSection('status-filter-container', 'chevron-status')"
+          style="width:100%; display:flex; justify-content:space-between; align-items:center; background:none; border:none; cursor:pointer; padding:0 0 10px 0; color:var(--text-muted);">
+          <span class="sidebar-section-title" style="margin-bottom:0;">Lọc theo trạng thái</span>
+          <svg id="chevron-status" style="width:13px; height:13px; fill:currentColor; transform:rotate(180deg); transition:transform 0.2s ease; flex-shrink:0;" viewBox="0 0 24 24">
+            <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+          </svg>
+        </button>
+        <div id="status-filter-container" class="filter-chips" style="display:flex;">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- FILTER DIFFICULTY -->
+      <div>
+        <button onclick="toggleSidebarSection('difficulty-filter-container', 'chevron-difficulty')"
+          style="width:100%; display:flex; justify-content:space-between; align-items:center; background:none; border:none; cursor:pointer; padding:0 0 10px 0; color:var(--text-muted);">
+          <span class="sidebar-section-title" style="margin-bottom:0;">Lọc theo độ khó</span>
+          <svg id="chevron-difficulty" style="width:13px; height:13px; fill:currentColor; transform:rotate(180deg); transition:transform 0.2s ease; flex-shrink:0;" viewBox="0 0 24 24">
+            <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+          </svg>
+        </button>
+        <div id="difficulty-filter-container" class="filter-chips" style="display:flex;">
           <!-- Rendered dynamically -->
         </div>
       </div>
@@ -1833,6 +1978,20 @@
       { id: 'done', label: 'Đã xử lý', bg: '#ecfdf5', text: '#047857', border: '#a7f3d0', isCompleted: true, order: 3 }
     ];
 
+    // DIFFICULTY CONFIGURATIONS
+    let DIFFICULTY_CONFIGS = [
+      { id: 'very_easy', label: 'Rất dễ', bg: '#e8f0fe', text: '#1a73e8', border: '#d2e3fc', weight: 1, order: 1 },
+      { id: 'easy', label: 'Dễ', bg: '#e6f4ea', text: '#137333', border: '#ceead6', weight: 2, order: 2 },
+      { id: 'medium', label: 'Trung bình', bg: '#fef7e0', text: '#b06000', border: '#feebc8', weight: 3, order: 3 },
+      { id: 'hard', label: 'Khó', bg: '#fce8e6', text: '#c5221f', border: '#fad2cf', weight: 5, order: 4 },
+      { id: 'very_hard', label: 'Cực khó', bg: '#f3e8ff', text: '#6b21a8', border: '#e9d5ff', weight: 8, order: 5 }
+    ];
+
+    function getDifficultyBadgeHtml(difficulty) {
+      const cfg = DIFFICULTY_CONFIGS.find(c => c.label === difficulty) || DIFFICULTY_CONFIGS.find(c => c.label === 'Trung bình') || DIFFICULTY_CONFIGS[0] || { bg: '#f1f5f9', text: '#475569', border: '#cbd5e1', label: difficulty || 'Chưa rõ' };
+      return `<span class="difficulty-badge" style="background:${cfg.bg}; color:${cfg.text}; border:1px solid ${cfg.border}; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:600; margin-left:8px; display:inline-flex; align-items:center; cursor:default;">${cfg.label}</span>`;
+    }
+
     // DYNAMIC STATUS STYLES INJECTION
     function applyStatusStyles() {
       let styleEl = document.getElementById('dynamic-status-styles');
@@ -1869,6 +2028,7 @@
     // APPLICATION STATE
     let screensMap = {};
     let activeFilter = 'ALL';
+    let activeDifficultyFilter = 'ALL';
     let searchQuery = '';
     let viewMode = 'tree'; // 'tree' | 'card'
     let collapsedNodes = {}; // Tracks expanded state for tree nodes
@@ -1982,6 +2142,9 @@
       });
 
       let completedCount = 0;
+      let totalWeight = 0;
+      let completedWeight = 0;
+
       screensList.forEach(s => {
         if (counts[s.status] !== undefined) {
           counts[s.status]++;
@@ -1993,19 +2156,36 @@
           }
         }
 
+        // Lấy trọng số dựa trên độ khó màn hình (mặc định là Trung bình - trọng số 3 nếu không khớp)
+        const diffCfg = DIFFICULTY_CONFIGS.find(cfg => cfg.label === s.difficulty) || DIFFICULTY_CONFIGS.find(cfg => cfg.id === 'medium') || { weight: 3 };
+        const weight = diffCfg.weight || 3;
+        totalWeight += weight;
+
         // Find if this status is a completed status in STATUS_CONFIGS
         const config = STATUS_CONFIGS.find(cfg => cfg.label === s.status);
         if (config && config.isCompleted) {
           completedCount++;
+          completedWeight += weight;
         }
       });
 
       const pct = total > 0 ? Math.round((completedCount / total) * 100) : 0;
+      const weightedPct = totalWeight > 0 ? Math.round((completedWeight / totalWeight) * 100) : 0;
 
       const globalProgressPct = document.getElementById('global-progress-pct');
       if (globalProgressPct) globalProgressPct.innerText = pct + '%';
       const globalProgressBar = document.getElementById('global-progress-bar');
       if (globalProgressBar) globalProgressBar.style.width = pct + '%';
+
+      // Cập nhật giao diện tiến độ theo độ khó
+      const globalWeightedProgressPct = document.getElementById('global-weighted-progress-pct');
+      if (globalWeightedProgressPct) {
+        globalWeightedProgressPct.innerText = `${weightedPct}% (${completedWeight}/${totalWeight}đ)`;
+      }
+      const globalWeightedProgressBar = document.getElementById('global-weighted-progress-bar');
+      if (globalWeightedProgressBar) {
+        globalWeightedProgressBar.style.width = weightedPct + '%';
+      }
 
       const statTotal = document.getElementById('stat-total');
       if (statTotal) statTotal.innerText = total;
@@ -2032,6 +2212,61 @@
           el.innerText = counts[s.label] || 0;
         }
       });
+
+      // Cập nhật bảng Thống kê chi tiết theo độ khó
+      const diffStatsContainer = document.getElementById('difficulty-stats-list');
+      if (diffStatsContainer) {
+        const diffCounts = {};
+        const diffDoneCounts = {};
+
+        DIFFICULTY_CONFIGS.forEach(d => {
+          diffCounts[d.label] = 0;
+          diffDoneCounts[d.label] = 0;
+        });
+
+        screensList.forEach(s => {
+          const diffLabel = s.difficulty || 'Trung bình';
+          if (diffCounts[diffLabel] !== undefined) {
+            diffCounts[diffLabel]++;
+          } else {
+            diffCounts['Trung bình'] = (diffCounts['Trung bình'] || 0) + 1;
+          }
+
+          const statusCfg = STATUS_CONFIGS.find(cfg => cfg.label === s.status);
+          if (statusCfg && statusCfg.isCompleted) {
+            if (diffDoneCounts[diffLabel] !== undefined) {
+              diffDoneCounts[diffLabel]++;
+            } else {
+              diffDoneCounts['Trung bình'] = (diffDoneCounts['Trung bình'] || 0) + 1;
+            }
+          }
+        });
+
+        const diffHtml = DIFFICULTY_CONFIGS.map(d => {
+          const total = diffCounts[d.label] || 0;
+          const done = diffDoneCounts[d.label] || 0;
+          const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+          return `
+            <div style="padding: 6px 8px; border-radius: 7px; border: 1px solid var(--card-border); background: var(--card-bg);">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px;">
+                <div style="display: flex; align-items: center; gap: 5px;">
+                  <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${d.text}; flex-shrink:0;"></span>
+                  <span style="font-size: 11px; font-weight: 600; color: var(--text-main);">${d.label}</span>
+                  <span style="font-size: 10px; color: ${d.text}; background: ${d.bg}; border: 1px solid ${d.border}; padding: 0 4px; border-radius: 3px; line-height: 1.6;">${d.weight}đ</span>
+                </div>
+                <div style="font-size: 11px; font-weight: 700; color: ${d.text};">
+                  ${done}/${total} <span style="font-weight:400; color: var(--text-muted); font-size:10px;">(${pct}%)</span>
+                </div>
+              </div>
+              <div style="height: 4px; background: ${d.bg}; border-radius: 99px; overflow: hidden; border: 1px solid ${d.border};">
+                <div style="height: 100%; width: ${pct}%; background: ${d.text}; border-radius: 99px; transition: width 0.4s ease;"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        diffStatsContainer.innerHTML = diffHtml;
+      }
     }
 
     // MATCH SEARCH AND FILTERS
@@ -2039,6 +2274,10 @@
       if (!item) return false;
       if (activeFilter !== 'ALL' && item.status !== activeFilter) {
         return false;
+      }
+      if (activeDifficultyFilter !== 'ALL') {
+        const diff = item.difficulty || 'Trung bình';
+        if (diff !== activeDifficultyFilter) return false;
       }
 
       if (searchQuery) {
@@ -2095,6 +2334,33 @@
       }
       if (screensMap[itemId]) {
         screensMap[itemId].status = newStatus;
+        saveProgress(itemId);
+        renderContent();
+      }
+    };
+
+    // GENERATE DIFFICULTY DROPDOWN HTML
+    function getDifficultyDropdownHtml(itemId, difficulty) {
+      const isDisabled = isEditMode ? '' : 'disabled';
+      const optionsHtml = DIFFICULTY_CONFIGS.map(cfg => `
+        <option value="${cfg.label}" ${difficulty === cfg.label ? 'selected' : ''}>${cfg.label}</option>
+      `).join('');
+
+      return `
+        <select class="status-dropdown" onchange="changeItemDifficulty('${itemId}', this.value)" ${isDisabled} style="width:100%; padding:6px 10px; border-radius:6px; border:1px solid var(--card-border); background:${isEditMode ? 'var(--card-bg)' : 'var(--item-hover)'}; color:var(--text-main); font-size:12px; outline:none; height:30px;">
+          ${optionsHtml}
+        </select>
+      `;
+    }
+
+    // HANDLE DIFFICULTY CHANGE
+    window.changeItemDifficulty = function (itemId, newDifficulty) {
+      if (!isEditMode) {
+        alert("Vui lòng mở khóa cấu hình để thay đổi độ khó!");
+        return;
+      }
+      if (screensMap[itemId]) {
+        screensMap[itemId].difficulty = newDifficulty;
         saveProgress(itemId);
         renderContent();
       }
@@ -2209,13 +2475,14 @@
                     <svg class="chevron-icon" id="chev-${screen.id}" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
                     <span class="screen-id-badge" style="background:var(--accent-light); color:var(--accent-color); border-color:transparent;">DASHBOARD</span>
                     <span class="screen-title-text" style="font-weight: 600;">${screen.name}</span>
+                    ${getDifficultyBadgeHtml(screen.difficulty || 'Trung bình')}
                   </div>
                   <div class="screen-controls" onclick="event.stopPropagation()">
                     ${getStatusDropdownHtml(screen.id, screen.status)}
                   </div>
                 </div>
                 <div class="screen-detail-panel hidden" id="detail-${screen.id}">
-                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px;">
+                  <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 1fr; gap: 12px; margin-bottom: 8px;">
                     <div class="details-row">
                       <div class="details-label">Link User Story (Jira)</div>
                       <input type="text" placeholder="Dán link Jira US..." value="${screen.jiraUrl || ''}" onblur="updateItemJira('${screen.id}', this.value)" style="width:100%; padding:6px 10px; border-radius:6px; border:1px solid var(--card-border); background:var(--card-bg); color:var(--text-main); font-size:12px; outline:none;">
@@ -2223,6 +2490,10 @@
                     <div class="details-row">
                       <div class="details-label">Link Màn hình Web thực tế</div>
                       <input type="text" placeholder="Dán link web chạy thực tế..." value="${screen.actualUrl || ''}" onblur="updateItemActualUrl('${screen.id}', this.value)" style="width:100%; padding:6px 10px; border-radius:6px; border:1px solid var(--card-border); background:var(--card-bg); color:var(--text-main); font-size:12px; outline:none;">
+                    </div>
+                    <div class="details-row">
+                      <div class="details-label">Độ khó màn hình</div>
+                      ${getDifficultyDropdownHtml(screen.id, screen.difficulty)}
                     </div>
                   </div>
                   <div class="details-row">
@@ -2237,7 +2508,13 @@
                         Đã lưu
                       </span>
                     </div>
-                    <textarea class="desc-textarea" placeholder="Gõ ghi chú, mô tả cho màn hình dashboard này..." onblur="updateItemDescription('${screen.id}', this.value)" ${isEditMode ? '' : 'readonly'} style="${isEditMode ? '' : 'cursor: default; background: rgba(0,0,0,0.02);'}">${screen.description || ''}</textarea>
+                    <div class="note-preview-box ql-editor" id="note-preview-${screen.id}">
+                      ${screen.description ? screen.description : '<em style="color:var(--text-muted);">Chưa có ghi chú, mô tả...</em>'}
+                    </div>
+                    <button onclick="openNoteEditorModal('${screen.id}')" style="margin-top: 6px; padding: 5px 11px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; border-radius: 20px; border: none; cursor: pointer; background: ${isEditMode ? 'linear-gradient(135deg,#6366f1,#8b5cf6)' : 'linear-gradient(135deg,#0ea5e9,#06b6d4)'}; color: #fff; box-shadow: 0 2px 8px ${isEditMode ? 'rgba(99,102,241,0.35)' : 'rgba(6,182,212,0.3)'}; transition: opacity 0.15s, transform 0.15s;" onmouseover="this.style.opacity='0.82'; this.style.transform='translateY(-1px)'" onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)'">
+                      <svg style="width:11px; height:11px; fill:#fff; flex-shrink:0;" viewBox="0 0 24 24"><path d="${isEditMode ? 'M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z' : 'M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z'}"/></svg>
+                      ${isEditMode ? 'Chỉnh sửa Ghi chú' : 'Xem Ghi chú'}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -2271,6 +2548,7 @@
                     <svg class="chevron-icon" id="chev-${screen.id}" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
                     <span class="screen-id-badge">${screen.id}</span>
                     <span class="screen-title-text">${screen.name}</span>
+                    ${getDifficultyBadgeHtml(screen.difficulty || 'Trung bình')}
                     ${screen.eduCode && screen.eduCode !== '-' ? `<span class="screen-edu-code">${screen.eduCode}</span>` : ''}
                     <div style="display:inline-flex; gap:6px; margin-left:8px;" onclick="event.stopPropagation()">
                       ${getBusinessLinksHtml(screen)}
@@ -2282,7 +2560,7 @@
                 </div>
                 
                 <div class="screen-detail-panel hidden" id="detail-${screen.id}">
-                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px;">
+                  <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 1fr; gap: 12px; margin-bottom: 8px;">
                     <div class="details-row">
                       <div class="details-label">Link User Story (Jira)</div>
                       <input type="text" placeholder="Dán link Jira US..." value="${screen.jiraUrl || ''}" onblur="updateItemJira('${screen.id}', this.value)" ${isEditMode ? '' : 'readonly'} style="width:100%; padding:6px 10px; border-radius:6px; border:1px solid var(--card-border); background:${isEditMode ? 'var(--card-bg)' : 'var(--item-hover)'}; color:var(--text-main); font-size:12px; outline:none; ${isEditMode ? '' : 'cursor: default;'}">
@@ -2290,6 +2568,10 @@
                     <div class="details-row">
                       <div class="details-label">Link Màn hình Web thực tế</div>
                       <input type="text" placeholder="Dán link web chạy thực tế..." value="${screen.actualUrl || ''}" onblur="updateItemActualUrl('${screen.id}', this.value)" ${isEditMode ? '' : 'readonly'} style="width:100%; padding:6px 10px; border-radius:6px; border:1px solid var(--card-border); background:${isEditMode ? 'var(--card-bg)' : 'var(--item-hover)'}; color:var(--text-main); font-size:12px; outline:none; ${isEditMode ? '' : 'cursor: default;'}">
+                    </div>
+                    <div class="details-row">
+                      <div class="details-label">Độ khó màn hình</div>
+                      ${getDifficultyDropdownHtml(screen.id, screen.difficulty)}
                     </div>
                   </div>
                   <div class="details-row">
@@ -2304,7 +2586,13 @@
                         Đã lưu
                       </span>
                     </div>
-                    <textarea class="desc-textarea" placeholder="Nhập ghi chú, mô tả logic, phân tích nghiệp vụ cho màn hình này..." onblur="updateItemDescription('${screen.id}', this.value)" ${isEditMode ? '' : 'readonly'} style="${isEditMode ? '' : 'cursor: default; background: rgba(0,0,0,0.02);'}">${screen.description || ''}</textarea>
+                    <div class="note-preview-box ql-editor" id="note-preview-${screen.id}">
+                      ${screen.description ? screen.description : '<em style="color:var(--text-muted);">Chưa có ghi chú, mô tả...</em>'}
+                    </div>
+                    <button onclick="openNoteEditorModal('${screen.id}')" style="margin-top: 6px; padding: 5px 11px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; border-radius: 20px; border: none; cursor: pointer; background: ${isEditMode ? 'linear-gradient(135deg,#6366f1,#8b5cf6)' : 'linear-gradient(135deg,#0ea5e9,#06b6d4)'}; color: #fff; box-shadow: 0 2px 8px ${isEditMode ? 'rgba(99,102,241,0.35)' : 'rgba(6,182,212,0.3)'}; transition: opacity 0.15s, transform 0.15s;" onmouseover="this.style.opacity='0.82'; this.style.transform='translateY(-1px)'" onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)'">
+                      <svg style="width:11px; height:11px; fill:#fff; flex-shrink:0;" viewBox="0 0 24 24"><path d="${isEditMode ? 'M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z' : 'M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z'}"/></svg>
+                      ${isEditMode ? 'Chỉnh sửa Ghi chú' : 'Xem Ghi chú'}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -2400,9 +2688,12 @@
                     <span class="screen-id-badge" style="background:var(--accent-light); color:var(--accent-color); border-color:transparent;">DASHBOARD</span>
                     ${getStatusDropdownHtml(screen.id, screen.status)}
                   </div>
-                  <div class="card-title" style="font-weight: 700;">${screen.name}</div>
+                  <div class="card-title" style="font-weight: 700;">
+                    ${screen.name}
+                    ${getDifficultyBadgeHtml(screen.difficulty || 'Trung bình')}
+                  </div>
                   
-                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
+                  <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 1fr; gap: 8px; margin-top: 8px;">
                     <div class="details-row">
                       <div class="details-label">Jira Link</div>
                       <input type="text" placeholder="Jira URL..." value="${screen.jiraUrl || ''}" onblur="updateItemJira('${screen.id}', this.value)" ${isEditMode ? '' : 'readonly'} style="width:100%; padding:4px 8px; border-radius:4px; border:1px solid var(--card-border); background:${isEditMode ? 'var(--sidebar-bg)' : 'var(--item-hover)'}; color:var(--text-main); font-size:11px; outline:none; ${isEditMode ? '' : 'cursor: default;'}">
@@ -2411,10 +2702,14 @@
                       <div class="details-label">Web URL</div>
                       <input type="text" placeholder="Actual URL..." value="${screen.actualUrl || ''}" onblur="updateItemActualUrl('${screen.id}', this.value)" ${isEditMode ? '' : 'readonly'} style="width:100%; padding:4px 8px; border-radius:4px; border:1px solid var(--card-border); background:${isEditMode ? 'var(--sidebar-bg)' : 'var(--item-hover)'}; color:var(--text-main); font-size:11px; outline:none; ${isEditMode ? '' : 'cursor: default;'}">
                     </div>
+                    <div class="details-row">
+                      <div class="details-label">Độ khó</div>
+                      ${getDifficultyDropdownHtml(screen.id, screen.difficulty)}
+                    </div>
                   </div>
 
                   <div class="details-row">
-                    <div class="details-label">Bảng DB liên quan</div>
+                    <div class="details-label">Bảng Database liên quan</div>
                     <div class="table-tags">${getTableTagsHtml(screen.tables)}</div>
                   </div>
                   <div class="details-row">
@@ -2425,7 +2720,13 @@
                         Đã lưu
                       </span>
                     </div>
-                    <textarea class="desc-textarea" placeholder="Nhập mô tả..." onblur="updateItemDescription('${screen.id}', this.value)" ${isEditMode ? '' : 'readonly'} style="${isEditMode ? '' : 'cursor: default; background: rgba(0,0,0,0.02);'}">${screen.description || ''}</textarea>
+                    <div class="note-preview-box ql-editor" id="note-preview-${screen.id}">
+                      ${screen.description ? screen.description : '<em style="color:var(--text-muted);">Chưa có ghi chú, mô tả...</em>'}
+                    </div>
+                    <button class="admin-btn secondary" style="padding: 4px 8px; font-size: 11px; display: inline-flex; align-items: center; gap: 4px; border-radius: 4px;" onclick="openNoteEditorModal('${screen.id}')">
+                      <svg class="icon-svg" style="width:12px; height:12px; fill:currentColor;" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                      ${isEditMode ? 'Xem & Chỉnh sửa Ghi chú' : 'Xem chi tiết Ghi chú'}
+                    </button>
                   </div>
                 </div>
               `;
@@ -2442,7 +2743,10 @@
                       <span class="screen-id-badge">${screen.id}</span>
                       ${getStatusDropdownHtml(screen.id, screen.status)}
                     </div>
-                    <div class="card-title">${screen.name}</div>
+                    <div class="card-title">
+                      ${screen.name}
+                      ${getDifficultyBadgeHtml(screen.difficulty || 'Trung bình')}
+                    </div>
                     
                     <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
                       <div style="display:flex; align-items:center; gap:8px;">
@@ -2454,7 +2758,7 @@
                       </div>
                     </div>
                     
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 1fr; gap: 8px;">
                       <div class="details-row">
                         <div class="details-label">Jira Link</div>
                         <input type="text" placeholder="Jira URL..." value="${screen.jiraUrl || ''}" onblur="updateItemJira('${screen.id}', this.value)" ${isEditMode ? '' : 'readonly'} style="width:100%; padding:4px 8px; border-radius:4px; border:1px solid var(--card-border); background:${isEditMode ? 'var(--sidebar-bg)' : 'var(--item-hover)'}; color:var(--text-main); font-size:11px; outline:none; ${isEditMode ? '' : 'cursor: default;'}">
@@ -2463,10 +2767,14 @@
                         <div class="details-label">Web URL</div>
                         <input type="text" placeholder="Actual URL..." value="${screen.actualUrl || ''}" onblur="updateItemActualUrl('${screen.id}', this.value)" ${isEditMode ? '' : 'readonly'} style="width:100%; padding:4px 8px; border-radius:4px; border:1px solid var(--card-border); background:${isEditMode ? 'var(--sidebar-bg)' : 'var(--item-hover)'}; color:var(--text-main); font-size:11px; outline:none; ${isEditMode ? '' : 'cursor: default;'}">
                       </div>
+                      <div class="details-row">
+                        <div class="details-label">Độ khó</div>
+                        ${getDifficultyDropdownHtml(screen.id, screen.difficulty)}
+                      </div>
                     </div>
 
                     <div class="details-row">
-                      <span class="details-label">Bảng DB liên quan</span>
+                      <span class="details-label">Bảng Database liên quan</span>
                       <div class="table-tags">${getTableTagsHtml(screen.tables)}</div>
                     </div>
                     
@@ -2478,7 +2786,13 @@
                           Đã lưu
                         </span>
                       </div>
-                      <textarea class="desc-textarea" placeholder="Ghi chú logic xử lý..." onblur="updateItemDescription('${screen.id}', this.value)" ${isEditMode ? '' : 'readonly'} style="${isEditMode ? '' : 'cursor: default; background: rgba(0,0,0,0.02);'}">${screen.description || ''}</textarea>
+                      <div class="note-preview-box ql-editor" id="note-preview-${screen.id}">
+                        ${screen.description ? screen.description : '<em style="color:var(--text-muted);">Chưa có ghi chú, mô tả...</em>'}
+                      </div>
+                      <button onclick="openNoteEditorModal('${screen.id}')" style="margin-top: 6px; padding: 5px 11px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; border-radius: 20px; border: none; cursor: pointer; background: ${isEditMode ? 'linear-gradient(135deg,#6366f1,#8b5cf6)' : 'linear-gradient(135deg,#0ea5e9,#06b6d4)'}; color: #fff; box-shadow: 0 2px 8px ${isEditMode ? 'rgba(99,102,241,0.35)' : 'rgba(6,182,212,0.3)'}; transition: opacity 0.15s, transform 0.15s;" onmouseover="this.style.opacity='0.82'; this.style.transform='translateY(-1px)'" onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)'">
+                        <svg style="width:11px; height:11px; fill:#fff; flex-shrink:0;" viewBox="0 0 24 24"><path d="${isEditMode ? 'M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z' : 'M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z'}"/></svg>
+                        ${isEditMode ? 'Chỉnh sửa Ghi chú' : 'Xem Ghi chú'}
+                      </button>
                     </div>
                   </div>
                 `;
@@ -2539,12 +2853,68 @@
 
       container.innerHTML = html;
       updateProgressMetrics();
+      renderDifficultyChips();
     }
 
     window.changeFilter = function (statusLabel) {
       activeFilter = statusLabel;
       renderSidebarChips();
       renderContent();
+    };
+
+    function renderDifficultyChips() {
+      const container = document.getElementById('difficulty-filter-container');
+      if (!container) return;
+      const screensList = Object.values(screensMap);
+      const counts = {};
+      DIFFICULTY_CONFIGS.forEach(d => { counts[d.label] = 0; });
+      screensList.forEach(s => {
+        const dl = s.difficulty || 'Trung bình';
+        if (counts[dl] !== undefined) counts[dl]++;
+      });
+
+      let html = `
+        <button class="filter-chip ${activeDifficultyFilter === 'ALL' ? 'active' : ''}" onclick="changeDifficultyFilter('ALL')">
+          <span>Tất cả</span>
+          <span class="chip-count">${screensList.length}</span>
+        </button>
+      `;
+      DIFFICULTY_CONFIGS.forEach(d => {
+        const isActive = activeDifficultyFilter === d.label;
+        html += `
+          <button class="filter-chip ${isActive ? 'active' : ''}" onclick="changeDifficultyFilter('${d.label}')"
+            style="${isActive ? `background:${d.bg}; color:${d.text}; border-color:${d.border};` : ''}">
+            <span>${d.label}</span>
+            <span class="chip-count">${counts[d.label] || 0}</span>
+          </button>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    window.changeDifficultyFilter = function (label) {
+      activeDifficultyFilter = label;
+      renderDifficultyChips();
+      renderContent();
+    };
+
+    window.toggleDiffStats = function () {
+      const list = document.getElementById('difficulty-stats-list');
+      const chevron = document.getElementById('diff-stats-chevron');
+      if (!list) return;
+      const isOpen = list.style.display === 'flex';
+      list.style.display = isOpen ? 'none' : 'flex';
+      if (chevron) chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+    };
+
+    // Generic toggle for sidebar collapsible sections
+    window.toggleSidebarSection = function (containerId, chevronId) {
+      const el = document.getElementById(containerId);
+      const chevron = document.getElementById(chevronId);
+      if (!el) return;
+      const isOpen = el.style.display !== 'none';
+      el.style.display = isOpen ? 'none' : 'flex';
+      if (chevron) chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
     };
 
     // MAIN RENDER TRIGGER
@@ -2910,6 +3280,17 @@
       applyStatusStyles();
     }
 
+    function loadLocalDifficultyConfigs() {
+      const saved = localStorage.getItem('asc_difficulty_configs');
+      if (saved) {
+        try {
+          DIFFICULTY_CONFIGS = JSON.parse(saved);
+        } catch (e) {
+          console.error("Failed to parse difficulty configs from local storage", e);
+        }
+      }
+    }
+
     let statusesListenerUnsubscribe = null;
     function setupStatusesListener() {
       if (statusesListenerUnsubscribe) {
@@ -2961,6 +3342,54 @@
       });
     }
 
+    let difficultiesListenerUnsubscribe = null;
+    function setupDifficultiesListener() {
+      if (difficultiesListenerUnsubscribe) {
+        difficultiesListenerUnsubscribe();
+        difficultiesListenerUnsubscribe = null;
+      }
+
+      if (!isFirebaseEnabled || !firestoreDb) return;
+
+      difficultiesListenerUnsubscribe = firestoreDb.collection('difficulty_configs').orderBy('order')
+        .onSnapshot(snap => {
+          if (!snap.empty) {
+            const list = [];
+            snap.forEach(doc => {
+              list.push({ id: doc.id, ...doc.data() });
+            });
+            DIFFICULTY_CONFIGS = list;
+            localStorage.setItem('asc_difficulty_configs', JSON.stringify(DIFFICULTY_CONFIGS));
+            renderContent();
+          } else {
+            initializeDefaultDifficultiesInFirestore();
+          }
+        }, err => {
+          console.error("Error listening to difficulty configs:", err);
+        });
+    }
+
+    function initializeDefaultDifficultiesInFirestore() {
+      if (!isFirebaseEnabled || !firestoreDb) return;
+      const batch = firestoreDb.batch();
+      DIFFICULTY_CONFIGS.forEach(diff => {
+        const docRef = firestoreDb.collection('difficulty_configs').doc(diff.id);
+        batch.set(docRef, {
+          label: diff.label,
+          bg: diff.bg,
+          text: diff.text,
+          border: diff.border,
+          weight: diff.weight,
+          order: diff.order
+        });
+      });
+      batch.commit().then(() => {
+        console.log("Initialized default difficulties in Firestore");
+      }).catch(err => {
+        console.error("Failed to initialize default difficulties in Firestore:", err);
+      });
+    }
+
     function fetchFirebaseConfig() {
       updateCloudStatus('connecting');
       if (typeof FIREBASE_CONFIG !== 'undefined' && FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey) {
@@ -3003,6 +3432,7 @@
         // Dynamically load modules & tables from Firestore first
         await loadModulesListFromFirestore();
         setupStatusesListener();
+        setupDifficultiesListener();
         setupTablesListener();
 
         switchModule(selectedModuleId);
@@ -3277,6 +3707,8 @@
         renderDatabaseAdmin(container);
       } else if (activeAdminTab === 'statuses') {
         renderStatusesAdmin(container);
+      } else if (activeAdminTab === 'difficulties') {
+        renderDifficultiesAdmin(container);
       }
     }
 
@@ -4627,17 +5059,221 @@
       `;
     }
 
+    // RENDER DIFFICULTIES ADMIN TAB
+    function renderDifficultiesAdmin(container) {
+      const listHtml = DIFFICULTY_CONFIGS.map(d => {
+        return `
+          <div class="admin-list-card" style="margin-bottom:8px;">
+            <div style="display:flex; flex-direction:column; gap:4px;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span class="difficulty-badge" style="background:${d.bg}; color:${d.text}; border:1px solid ${d.border}; padding:2px 8px; font-size:11px; border-radius:4px; font-weight:600; cursor:default;">
+                  ${d.label}
+                </span>
+                <span style="font-size:11px; color:var(--text-muted);">Trọng số: <strong>${d.weight}</strong></span>
+                <span style="font-size:11px; color:var(--text-muted);">| Thứ tự: ${d.order}</span>
+              </div>
+              <div style="font-size:10px; color:var(--text-muted);">
+                BG: ${d.bg} | Chữ: ${d.text} | Viền: ${d.border}
+              </div>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="admin-btn secondary" style="padding:4px 8px; font-size:11px;" onclick="editDifficultyPrompt('${d.id}')">Sửa</button>
+              <button class="admin-btn danger" style="padding:4px 8px; font-size:11px;" onclick="deleteDifficultyPrompt('${d.id}')">Xóa</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = `
+        <div class="admin-panel-title">Quản lý Cấu hình Độ khó & Trọng số</div>
+        <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:20px;">
+          <div>
+            <h4 style="font-size:12px; font-weight:700; margin-bottom:12px; color:var(--text-muted); text-transform:uppercase;">Danh sách Độ khó</h4>
+            <div style="max-height: 380px; overflow-y:auto; padding-right:4px;">
+              ${listHtml || '<div style="color:var(--text-muted); font-size:12px;">Chưa có độ khó nào.</div>'}
+            </div>
+          </div>
+          <div style="border-left: 1px solid var(--card-border); padding-left:20px;">
+            <h4 id="diff-form-title" style="font-size:12px; font-weight:700; margin-bottom:12px; color:var(--text-muted); text-transform:uppercase;">Thêm Độ khó mới</h4>
+            <input type="hidden" id="diff-admin-edit-id" value="">
+            
+            <div class="admin-input-group" style="margin-bottom:10px;">
+              <label>Tên Độ khó</label>
+              <input type="text" id="diff-admin-label" class="admin-input" placeholder="Ví dụ: Rất khó">
+            </div>
+
+            <div class="admin-input-group" style="margin-bottom:10px;">
+              <label>Màu sắc mẫu (Preset)</label>
+              <select id="diff-admin-preset" class="admin-input" onchange="applyDifficultyPresetColors(this.value)">
+                <option value="">-- Chọn bảng màu mẫu --</option>
+                <option value="blue">Màu Xanh Dương (Google Rất Dễ)</option>
+                <option value="green">Màu Xanh Lá (Google Dễ)</option>
+                <option value="yellow">Màu Vàng (Google Trung Bình)</option>
+                <option value="red">Màu Đỏ (Google Khó)</option>
+                <option value="purple">Màu Tím (Google Cực Khó)</option>
+              </select>
+            </div>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:10px;">
+              <div class="admin-input-group">
+                <label>Màu nền (BG)</label>
+                <input type="color" id="diff-admin-bg" class="admin-input" style="height:32px; padding:2px;" value="#e8f0fe">
+              </div>
+              <div class="admin-input-group">
+                <label>Màu chữ</label>
+                <input type="color" id="diff-admin-text" class="admin-input" style="height:32px; padding:2px;" value="#1a73e8">
+              </div>
+              <div class="admin-input-group">
+                <label>Màu viền</label>
+                <input type="color" id="diff-admin-border" class="admin-input" style="height:32px; padding:2px;" value="#d2e3fc">
+              </div>
+            </div>
+            
+            <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:12px; margin-bottom:12px;">
+              <div class="admin-input-group">
+                <label>Trọng số (Weight)</label>
+                <input type="number" id="diff-admin-weight" class="admin-input" style="padding:4px 8px;" value="1" min="1" max="100">
+              </div>
+              <div class="admin-input-group">
+                <label>Thứ tự hiển thị (Order)</label>
+                <input type="number" id="diff-admin-order" class="admin-input" style="padding:4px 8px;" value="${DIFFICULTY_CONFIGS.length + 1}">
+              </div>
+            </div>
+            
+            <div style="display:flex; gap:8px;">
+              <button class="admin-btn primary" onclick="saveDifficultyConfig()">Lưu cấu hình</button>
+              <button id="cancel-edit-diff-btn" class="admin-btn secondary" style="display:none;" onclick="cancelEditDifficulty()">Hủy</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    window.applyDifficultyPresetColors = function (val) {
+      const bgInput = document.getElementById('diff-admin-bg');
+      const txtInput = document.getElementById('diff-admin-text');
+      const bdrInput = document.getElementById('diff-admin-border');
+      if (!bgInput || !txtInput || !bdrInput) return;
+
+      if (val === 'blue') {
+        bgInput.value = '#e8f0fe'; txtInput.value = '#1a73e8'; bdrInput.value = '#d2e3fc';
+      } else if (val === 'green') {
+        bgInput.value = '#e6f4ea'; txtInput.value = '#137333'; bdrInput.value = '#ceead6';
+      } else if (val === 'yellow') {
+        bgInput.value = '#fef7e0'; txtInput.value = '#b06000'; bdrInput.value = '#feebc8';
+      } else if (val === 'red') {
+        bgInput.value = '#fce8e6'; txtInput.value = '#c5221f'; bdrInput.value = '#fad2cf';
+      } else if (val === 'purple') {
+        bgInput.value = '#f3e8ff'; txtInput.value = '#6b21a8'; bdrInput.value = '#e9d5ff';
+      }
+    };
+
+    window.editDifficultyPrompt = function (id) {
+      const diff = DIFFICULTY_CONFIGS.find(d => d.id === id);
+      if (!diff) return;
+
+      document.getElementById('diff-form-title').innerText = 'Chỉnh sửa Độ khó';
+      document.getElementById('diff-admin-edit-id').value = diff.id;
+      document.getElementById('diff-admin-label').value = diff.label;
+      document.getElementById('diff-admin-bg').value = diff.bg;
+      document.getElementById('diff-admin-text').value = diff.text;
+      document.getElementById('diff-admin-border').value = diff.border;
+      document.getElementById('diff-admin-weight').value = diff.weight;
+      document.getElementById('diff-admin-order').value = diff.order;
+      document.getElementById('cancel-edit-diff-btn').style.display = 'inline-block';
+    };
+
+    window.cancelEditDifficulty = function () {
+      document.getElementById('diff-form-title').innerText = 'Thêm Độ khó mới';
+      document.getElementById('diff-admin-edit-id').value = '';
+      document.getElementById('diff-admin-label').value = '';
+      document.getElementById('diff-admin-bg').value = '#e8f0fe';
+      document.getElementById('diff-admin-text').value = '#1a73e8';
+      document.getElementById('diff-admin-border').value = '#d2e3fc';
+      document.getElementById('diff-admin-weight').value = '1';
+      document.getElementById('diff-admin-order').value = DIFFICULTY_CONFIGS.length + 1;
+      document.getElementById('cancel-edit-diff-btn').style.display = 'none';
+    };
+
+    window.saveDifficultyConfig = function () {
+      const editId = document.getElementById('diff-admin-edit-id').value.trim();
+      const labelVal = document.getElementById('diff-admin-label').value.trim();
+      const bgVal = document.getElementById('diff-admin-bg').value;
+      const textVal = document.getElementById('diff-admin-text').value;
+      const borderVal = document.getElementById('diff-admin-border').value;
+      const weightVal = parseInt(document.getElementById('diff-admin-weight').value) || 1;
+      const orderVal = parseInt(document.getElementById('diff-admin-order').value) || (DIFFICULTY_CONFIGS.length + 1);
+
+      if (!labelVal) {
+        alert("Vui lòng nhập tên độ khó!");
+        return;
+      }
+
+      const id = editId || 'diff_' + Date.now();
+      const data = {
+        label: labelVal,
+        bg: bgVal,
+        text: textVal,
+        border: borderVal,
+        weight: weightVal,
+        order: orderVal
+      };
+
+      if (isFirebaseEnabled && firestoreDb) {
+        firestoreDb.collection('difficulty_configs').doc(id).set(data)
+          .then(() => {
+            showToast("Đã lưu cấu hình độ khó lên Cloud Firestore!");
+            cancelEditDifficulty();
+            renderAdminTabContent();
+          })
+          .catch(err => {
+            console.error("Failed to save difficulty config to Cloud:", err);
+            showToast("Lỗi đồng bộ lên Cloud", "error");
+          });
+      } else {
+        const idx = DIFFICULTY_CONFIGS.findIndex(d => d.id === id);
+        if (idx >= 0) {
+          DIFFICULTY_CONFIGS[idx] = { id, ...data };
+        } else {
+          DIFFICULTY_CONFIGS.push({ id, ...data });
+        }
+        DIFFICULTY_CONFIGS.sort((a, b) => a.order - b.order);
+        localStorage.setItem('asc_difficulty_configs', JSON.stringify(DIFFICULTY_CONFIGS));
+        showToast("Đã lưu cấu hình độ khó cục bộ!");
+        cancelEditDifficulty();
+        renderAdminTabContent();
+        renderContent();
+      }
+    };
+
+    window.deleteDifficultyPrompt = function (id) {
+      if (!confirm("Bạn có chắc chắn muốn xóa độ khó này không? Các màn hình cũ sẽ giữ nhãn nhưng mất cấu hình trọng số.")) return;
+
+      if (isFirebaseEnabled && firestoreDb) {
+        firestoreDb.collection('difficulty_configs').doc(id).delete()
+          .then(() => {
+            showToast("Đã xóa cấu hình độ khó khỏi Cloud Firestore!");
+            renderAdminTabContent();
+          })
+          .catch(err => {
+            console.error("Failed to delete difficulty config:", err);
+            showToast("Lỗi khi xóa cấu hình", "error");
+          });
+      } else {
+        DIFFICULTY_CONFIGS = DIFFICULTY_CONFIGS.filter(d => d.id !== id);
+        localStorage.setItem('asc_difficulty_configs', JSON.stringify(DIFFICULTY_CONFIGS));
+        showToast("Đã xóa cấu hình độ khó cục bộ!");
+        renderAdminTabContent();
+        renderContent();
+      }
+    };
+
     // =============================================
     // LOCK/UNLOCK EDIT FEATURES CONFIG
     // =============================================
     function checkEditMode() {
-      const hostname = window.location.hostname;
-      const isLocal = hostname === 'localhost' ||
-        hostname === '127.0.0.1' ||
-        hostname.startsWith('192.168.') ||
-        hostname.startsWith('172.');
       const isUnlocked = localStorage.getItem('asc_admin_unlocked') === 'true';
-      isEditMode = isLocal || isUnlocked;
+      isEditMode = isUnlocked;
 
       updateLockStatusUI();
     }
@@ -4645,29 +5281,19 @@
     function updateLockStatusUI() {
       const lockBtn = document.getElementById('lock-toggle-btn');
       if (lockBtn) {
-        const hostname = window.location.hostname;
-        const isLocal = hostname === 'localhost' ||
-          hostname === '127.0.0.1' ||
-          hostname.startsWith('192.168.') ||
-          hostname.startsWith('172.');
-
-        if (isLocal) {
-          lockBtn.style.display = 'none';
+        lockBtn.style.display = 'flex';
+        if (isEditMode) {
+          lockBtn.innerHTML = `
+            <svg class="icon-svg" viewBox="0 0 24 24" style="fill:#ef4444; width:16px; height:16px; margin-right:4px;"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+            <span class="btn-text-label">Khóa Cấu Hình</span>
+          `;
+          lockBtn.title = "Bấm để khóa lại chế độ Chỉ Xem";
         } else {
-          lockBtn.style.display = 'flex';
-          if (isEditMode) {
-            lockBtn.innerHTML = `
-              <svg class="icon-svg" viewBox="0 0 24 24" style="fill:#ef4444; width:16px; height:16px; margin-right:4px;"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
-              <span class="btn-text-label">Khóa Cấu Hình</span>
-            `;
-            lockBtn.title = "Bấm để khóa lại chế độ Chỉ Xem";
-          } else {
-            lockBtn.innerHTML = `
-              <svg class="icon-svg" viewBox="0 0 24 24" style="fill:#10b981; width:16px; height:16px; margin-right:4px;"><path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6h1.9c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm0 12H6V10h12v10z"/></svg>
-              <span class="btn-text-label">Mở Khóa</span>
-            `;
-            lockBtn.title = "Nhập mật mã để chỉnh sửa cấu hình";
-          }
+          lockBtn.innerHTML = `
+            <svg class="icon-svg" viewBox="0 0 24 24" style="fill:#10b981; width:16px; height:16px; margin-right:4px;"><path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6h1.9c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm0 12H6V10h12v10z"/></svg>
+            <span class="btn-text-label">Mở Khóa</span>
+          `;
+          lockBtn.title = "Nhập mật mã để chỉnh sửa cấu hình";
         }
       }
 
@@ -4680,27 +5306,127 @@
       if (resetBtn) resetBtn.style.display = isEditMode ? 'flex' : 'none';
     }
 
-    window.toggleLockMode = function () {
+    window.toggleLockMode = async function () {
       if (isEditMode) {
         localStorage.removeItem('asc_admin_unlocked');
         showToast("Đã khóa lại chế độ chỉ xem!");
         setTimeout(() => location.reload(), 600);
       } else {
         const pass = prompt("Nhập mật mã để mở khóa các tính năng cấu hình:");
-        if (pass === 'minhchau@2026') {
+        if (pass === null) return;
+
+        let correctPassword = 'asc@2026';
+        if (isFirebaseEnabled && firestoreDb) {
+          try {
+            const doc = await firestoreDb.collection('settings').doc('auth').get();
+            if (doc.exists && doc.data().password) {
+              correctPassword = doc.data().password;
+            }
+          } catch (e) {
+            console.error("Failed to fetch password from Firebase settings/auth:", e);
+          }
+        }
+
+        if (pass === correctPassword) {
           localStorage.setItem('asc_admin_unlocked', 'true');
           showToast("Mở khóa cấu hình thành công!");
           setTimeout(() => location.reload(), 600);
-        } else if (pass !== null) {
+        } else {
           alert("Mật mã không đúng!");
         }
       }
+    };
+
+    // RICH TEXT EDITOR MODAL FOR NOTES
+    let currentEditingItemId = null;
+    let quillEditorInstance = null;
+
+    window.openNoteEditorModal = function (itemId) {
+      const screen = screensMap[itemId] || { id: itemId, name: 'Không xác định', description: '' };
+      currentEditingItemId = itemId;
+
+      const modal = document.getElementById('note-editor-modal');
+      const titleEl = document.getElementById('note-editor-title');
+      const saveBtn = document.getElementById('note-save-btn');
+
+      if (!modal) return;
+
+      titleEl.innerText = isEditMode
+        ? `📝 Xem & Chỉnh sửa Ghi chú: ${screen.name} (${itemId})`
+        : `🔍 Xem chi tiết Ghi chú: ${screen.name} (${itemId})`;
+
+      if (saveBtn) {
+        saveBtn.style.display = isEditMode ? 'inline-block' : 'none';
+      }
+
+      modal.style.display = 'flex';
+      modal.classList.add('active');
+
+      // Initialize Quill if it's the first time
+      if (!quillEditorInstance) {
+        quillEditorInstance = new Quill('#note-quill-editor', {
+          theme: 'snow',
+          placeholder: 'Gõ nội dung mô tả, ghi chú cho màn hình này...',
+          modules: {
+            toolbar: [
+              ['bold', 'italic', 'underline', 'strike'],
+              [{ 'color': [] }, { 'background': [] }],
+              [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+              ['link', 'clean']
+            ]
+          },
+          readOnly: !isEditMode
+        });
+      } else {
+        quillEditorInstance.enable(isEditMode);
+      }
+
+      // Load content
+      quillEditorInstance.clipboard.dangerouslyPasteHTML(screen.description || '');
+    };
+
+    window.closeNoteEditorModal = function () {
+      const modal = document.getElementById('note-editor-modal');
+      if (modal) {
+        modal.classList.remove('active');
+        setTimeout(() => {
+          if (!modal.classList.contains('active')) {
+            modal.style.display = 'none';
+          }
+        }, 200);
+      }
+      currentEditingItemId = null;
+    };
+
+    window.saveNoteEditorContent = function () {
+      if (!isEditMode || !currentEditingItemId) return;
+
+      const htmlContent = quillEditorInstance.root.innerHTML;
+      // If it's just an empty paragraph, clear it
+      const isEmpty = htmlContent === '<p><br></p>' || htmlContent.trim() === '';
+      const finalVal = isEmpty ? '' : htmlContent;
+
+      if (screensMap[currentEditingItemId]) {
+        screensMap[currentEditingItemId].description = finalVal;
+
+        // Update the notes preview box content immediately in DOM to avoid full re-render
+        const previewBox = document.getElementById(`note-preview-${currentEditingItemId}`);
+        if (previewBox) {
+          previewBox.innerHTML = finalVal ? finalVal : '<em style="color:var(--text-muted);">Chưa có ghi chú, mô tả...</em>';
+        }
+
+        saveProgress(currentEditingItemId);
+        showSaveIndicator(currentEditingItemId);
+      }
+
+      closeNoteEditorModal();
     };
 
     // INITIALIZATION
     window.onload = () => {
       checkEditMode();
       loadLocalStatusConfigs();
+      loadLocalDifficultyConfigs();
       fetchFirebaseConfig();
     };
 
@@ -4753,6 +5479,8 @@
             DB</button>
           <button class="admin-tab-btn" id="tab-btn-statuses" onclick="switchAdminTab('statuses')">Quản lý Trạng
             thái</button>
+          <button class="admin-tab-btn" id="tab-btn-difficulties" onclick="switchAdminTab('difficulties')">Quản lý Độ
+            khó</button>
         </div>
         <div class="admin-content-area" id="admin-tab-content">
           <!-- Loaded dynamically -->
@@ -4760,6 +5488,28 @@
       </div>
     </div>
   </div>
+
+  <!-- NOTE EDITOR MODAL -->
+  <div class="admin-modal-overlay" id="note-editor-modal"
+    style="display:none; align-items:center; justify-content:center; z-index:9999;">
+      <div class="admin-modal-card"
+        style="max-width:800px; width:95%; height:80vh; display:flex; flex-direction:column;">
+        <div class="admin-modal-header" style="flex-shrink:0;">
+          <h3 id="note-editor-title">📝 Xem chi tiết & Chỉnh sửa Ghi chú</h3>
+          <button class="close-modal-btn" onclick="closeNoteEditorModal()">&times;</button>
+        </div>
+        <div class="admin-modal-body"
+          style="flex:1; display:flex; flex-direction:column; padding:16px; overflow:hidden;">
+          <!-- Quill Editor container -->
+          <div id="note-quill-editor" style="flex:1; display:flex; flex-direction:column; overflow:hidden;"></div>
+        </div>
+        <div class="admin-modal-footer"
+          style="padding:12px 16px; border-top:1px solid var(--card-border); display:flex; justify-content:flex-end; gap:12px; flex-shrink:0;">
+          <button class="admin-btn secondary" onclick="closeNoteEditorModal()">Đóng</button>
+          <button class="admin-btn primary" id="note-save-btn" onclick="saveNoteEditorContent()">Lưu thay đổi</button>
+        </div>
+      </div>
+    </div>
 </body>
 
 </html>

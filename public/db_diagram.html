@@ -1394,6 +1394,9 @@
     let isPanning = false;
     let panOffset = { x: 0, y: 0 };
     let isEditMode = false;
+    let clickedTableId = null;
+    let startPanX = 0;
+    let startPanY = 0;
     
     const svg = document.getElementById("svg-canvas");
     const svgRect = svg.getBoundingClientRect();
@@ -1538,6 +1541,23 @@
         isPanning = true;
         panOffset.x = e.clientX - offset.x;
         panOffset.y = e.clientY - offset.y;
+        startPanX = e.clientX;
+        startPanY = e.clientY;
+      }
+    });
+    
+    // Clear highlight when clicking the canvas background
+    stage.addEventListener("click", (e) => {
+      if (e.target.closest(".table-card")) return;
+      if (e.target.closest(".top-banner")) return;
+      
+      const dx = e.clientX - startPanX;
+      const dy = e.clientY - startPanY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      if (distance < 5) {
+        clickedTableId = null;
+        clearHighlights();
       }
     });
     
@@ -1649,9 +1669,22 @@
           </div>
         `;
         
+        // Click listener to persist highlight
+        fObj.addEventListener("click", (e) => {
+          e.stopPropagation();
+          clickedTableId = table.id;
+          highlightConnections(table.id);
+        });
+
         // Hover listeners
         fObj.addEventListener("mouseenter", () => highlightConnections(table.id));
-        fObj.addEventListener("mouseleave", () => clearHighlights());
+        fObj.addEventListener("mouseleave", () => {
+          if (clickedTableId) {
+            highlightConnections(clickedTableId);
+          } else {
+            clearHighlights();
+          }
+        });
 
         // Right-click listener
         fObj.addEventListener("contextmenu", (e) => {
@@ -1708,6 +1741,10 @@
           linesGroup.appendChild(path);
         });
       });
+      
+      if (clickedTableId) {
+        highlightConnections(clickedTableId);
+      }
     }
     
     // HIGHLIGHT & FOCUS LOGIC
@@ -1776,6 +1813,7 @@
       offset.y = stageH / 2 - (table.y + h / 2) * scale;
       
       updateTransform();
+      clickedTableId = tableId; // Keep highlight state on focus
       highlightConnections(tableId);
       
       // Flash table card border
@@ -1794,8 +1832,12 @@
       
       if (!query) {
         listItems.forEach(item => item.style.display = "");
-        cards.forEach(card => card.classList.remove("faded", "highlighted"));
-        lines.forEach(line => line.classList.remove("faded", "highlighted"));
+        if (clickedTableId) {
+          highlightConnections(clickedTableId);
+        } else {
+          cards.forEach(card => card.classList.remove("faded", "highlighted"));
+          lines.forEach(line => line.classList.remove("faded", "highlighted"));
+        }
         return;
       }
       
@@ -1848,6 +1890,14 @@
         btn.classList.add("active");
       } else {
         btn.classList.remove("active");
+      }
+      
+      // Clear clickedTableId if the group it belongs to was hidden
+      if (clickedTableId) {
+        const clickedTable = tables.find(t => t.id === clickedTableId);
+        if (clickedTable && clickedTable.group === groupName && !activeGroups[groupName]) {
+          clickedTableId = null;
+        }
       }
       
       // Update sidebar items visibility
@@ -1961,13 +2011,8 @@
     // LOCK/UNLOCK EDIT FEATURES CONFIG
     // =============================================
     function checkEditMode() {
-      const hostname = window.location.hostname;
-      const isLocal = hostname === 'localhost' || 
-                      hostname === '127.0.0.1' || 
-                      hostname.startsWith('192.168.') || 
-                      hostname.startsWith('172.');
       const isUnlocked = localStorage.getItem('asc_admin_unlocked') === 'true';
-      isEditMode = isLocal || isUnlocked;
+      isEditMode = isUnlocked;
       
       updateLockStatusUI();
     }
@@ -1975,29 +2020,19 @@
     function updateLockStatusUI() {
       const lockBtn = document.getElementById('lock-toggle-btn');
       if (lockBtn) {
-        const hostname = window.location.hostname;
-        const isLocal = hostname === 'localhost' || 
-                        hostname === '127.0.0.1' || 
-                        hostname.startsWith('192.168.') || 
-                        hostname.startsWith('172.');
-        
-        if (isLocal) {
-          lockBtn.style.display = 'none';
+        lockBtn.style.display = 'inline-flex';
+        if (isEditMode) {
+          lockBtn.innerHTML = `
+            <svg style="width:12px; height:12px; fill:#ef4444; margin-right:4px;" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+            <span>Khóa cấu hình</span>
+          `;
+          lockBtn.title = "Bấm để khóa lại chế độ Chỉ Xem";
         } else {
-          lockBtn.style.display = 'inline-flex';
-          if (isEditMode) {
-            lockBtn.innerHTML = `
-              <svg style="width:12px; height:12px; fill:#ef4444; margin-right:4px;" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
-              <span>Khóa cấu hình</span>
-            `;
-            lockBtn.title = "Bấm để khóa lại chế độ Chỉ Xem";
-          } else {
-            lockBtn.innerHTML = `
-              <svg style="width:12px; height:12px; fill:#10b981; margin-right:4px;" viewBox="0 0 24 24"><path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6h1.9c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm0 12H6V10h12v10z"/></svg>
-              <span>Mở khóa</span>
-            `;
-            lockBtn.title = "Nhập mật mã để chỉnh sửa cấu hình";
-          }
+          lockBtn.innerHTML = `
+            <svg style="width:12px; height:12px; fill:#10b981; margin-right:4px;" viewBox="0 0 24 24"><path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6h1.9c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm0 12H6V10h12v10z"/></svg>
+            <span>Mở khóa</span>
+          `;
+          lockBtn.title = "Nhập mật mã để chỉnh sửa cấu hình";
         }
       }
       
@@ -2007,18 +2042,32 @@
       }
     }
 
-    window.toggleLockMode = function() {
+    window.toggleLockMode = async function() {
       if (isEditMode) {
         localStorage.removeItem('asc_admin_unlocked');
         alert("Đã khóa lại chế độ chỉ xem!");
         location.reload();
       } else {
         const pass = prompt("Nhập mật mã để mở khóa các tính năng cấu hình:");
-        if (pass === 'minhchau@2026') {
+        if (pass === null) return;
+
+        let correctPassword = 'asc@2026';
+        if (isFirebaseEnabled && firestoreDb) {
+          try {
+            const doc = await firestoreDb.collection('settings').doc('auth').get();
+            if (doc.exists && doc.data().password) {
+              correctPassword = doc.data().password;
+            }
+          } catch (e) {
+            console.error("Failed to fetch password from Firebase settings/auth in db_diagram:", e);
+          }
+        }
+
+        if (pass === correctPassword) {
           localStorage.setItem('asc_admin_unlocked', 'true');
           alert("Mở khóa cấu hình thành công!");
           location.reload();
-        } else if (pass !== null) {
+        } else {
           alert("Mật mã không đúng!");
         }
       }
