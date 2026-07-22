@@ -121,6 +121,7 @@ function saveProgress(itemId) {
         eduCode: item.eduCode || '-',
         tables: item.tables || [],
         status: item.status || 'Chưa xử lý',
+        difficulty: item.difficulty || 'Trung bình',
         description: item.description || '',
         jiraUrl: item.jiraUrl || '',
         actualUrl: item.actualUrl || '',

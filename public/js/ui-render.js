@@ -251,6 +251,9 @@ window.changeItemDifficulty = function (itemId, newDifficulty) {
     screensMap[itemId].difficulty = newDifficulty;
     saveProgress(itemId);
     renderContent();
+    if (typeof showToast === 'function') {
+      showToast(`Đã cập nhật độ khó [${screensMap[itemId].id}] thành "${newDifficulty}"`);
+    }
   }
 };
 

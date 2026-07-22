@@ -280,6 +280,12 @@ function renderScreensAdmin(container) {
             <input type="text" id="edit-scr-educode" class="admin-input" placeholder="Mã EDU..." value="${currentScreen.eduCode || '-'}">
           </div>
           <div class="admin-input-group">
+            <label>Mức độ khó</label>
+            <select id="edit-scr-difficulty" class="admin-input">
+              ${DIFFICULTY_CONFIGS.map(d => `<option value="${d.label}" ${(currentScreen.difficulty || 'Trung bình') === d.label ? 'selected' : ''}>${d.label} (${d.weight}đ)</option>`).join('')}
+            </select>
+          </div>
+          <div class="admin-input-group">
             <label>Bảng DB liên quan</label>
             <div style="max-height:140px; overflow-y:auto; border:1px solid var(--card-border); padding:6px; border-radius:6px; background:var(--card-bg); display:flex; flex-direction:column; gap:4px;">
               ${tablesCheckboxHtml || '<div style="font-size:11px; color:var(--text-muted);">Không có bảng nào.</div>'}
@@ -323,6 +329,12 @@ function renderScreensAdmin(container) {
           <div class="admin-input-group">
             <label>Mã EDU cũ</label>
             <input type="text" id="new-scr-educode" class="admin-input" placeholder="Ví dụ: E041005 (hoặc -)">
+          </div>
+          <div class="admin-input-group">
+            <label>Mức độ khó</label>
+            <select id="new-scr-difficulty" class="admin-input">
+              ${DIFFICULTY_CONFIGS.map(d => `<option value="${d.label}" ${d.label === 'Trung bình' ? 'selected' : ''}>${d.label} (${d.weight}đ)</option>`).join('')}
+            </select>
           </div>
           <div class="admin-input-group">
             <label>Bảng DB liên quan</label>
@@ -403,9 +415,12 @@ window.saveEditScreen = function () {
   const scr = screensMap[activeEditScreenId];
   if (!scr) return;
 
+  const difficulty = document.getElementById('edit-scr-difficulty') ? document.getElementById('edit-scr-difficulty').value : (scr.difficulty || 'Trung bình');
+
   scr.name = name;
   scr.eduCode = eduCode;
   scr.tables = selectedTables;
+  scr.difficulty = difficulty;
 
   let oldGroupInfo = null;
   activeMenuStructure.forEach((modNode, mIdx) => {
@@ -469,6 +484,7 @@ window.addNewScreen = function () {
   const id = document.getElementById('new-scr-id').value.trim();
   const name = document.getElementById('new-scr-name').value.trim();
   const eduCode = document.getElementById('new-scr-educode').value.trim() || '-';
+  const difficulty = document.getElementById('new-scr-difficulty') ? document.getElementById('new-scr-difficulty').value : 'Trung bình';
 
   if (!groupKey) {
     alert("Vui lòng chọn nhóm menu!");
@@ -496,6 +512,7 @@ window.addNewScreen = function () {
     tables: selectedTables,
     description: '',
     status: 'Chưa xử lý',
+    difficulty: difficulty,
     jiraUrl: '',
     actualUrl: ''
   };
